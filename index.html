@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WiFi Card Generator</title>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <link href="https://css.gg/menu-right.css" rel="stylesheet">
+  <link href="https://css.gg/close.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+  <script>
+    document.addEventListener('contextmenu', event => event.preventDefault());
+    document.onkeydown = function(e) {
+      if (e.keyCode === 123) return false; // F12
+      if (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74)) return false; // Ctrl+Shift+I or J
+      if (e.ctrlKey && e.keyCode === 85) return false; // Ctrl+U
+      if (e.ctrlKey && e.keyCode === 83) return false; // Ctrl+S
+    };
+  </script>
+  <style>
+    :root {
+      --primary-color: #0078d4;
+      --secondary-color: #00b4ff;
+      --text-primary: #ffffff;
+      --text-secondary: rgba(255, 255, 255, 0.8);
+      --darker-bg: #0a0a0a;
+      --card-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+      --card-shadow-hover: 0 12px 28px rgba(0, 0, 0, 0.2);
+      --transition-fast: 0.2s ease;
+      --transition-medium: 0.3s ease;
+      --transition-slow: 0.4s ease;
+    }
+
+    /* Smooth scrolling */
+    html {
+      scroll-behavior: smooth;
+    }
+
+    /* Navbar */
+    .navbar {
+      background-color: rgba(10, 10, 10, 0.9);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      width: 100%;
+      box-sizing: border-box;
+      transition: all var(--transition-medium);
+    }
+
+    .navbar.scrolled {
+      padding: 0.8rem 2rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .navbar-container {
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .navbar-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .navbar-brand a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 600;
+      font-size: 1.5rem;
+      background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      letter-spacing: 0.5px;
+      text-decoration: none;
+      transition: all var(--transition-medium);
+    }
+
+    .navbar-brand a:hover {
+      transform: scale(1.05);
+    }
+
+    .github-logo {
+      width: 32px;
+      height: 32px;
+      transition: transform var(--transition-medium);
+    }
+
+    .github-logo:hover {
+      transform: rotate(10deg) scale(1.1);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 1.5rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .nav-link {
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      font-size: 0.95rem;
+      transition: all var(--transition-medium);
+      position: relative;
+      color: var(--text-secondary);
+    }
+
+    .nav-link a {
+      color: inherit;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .nav-link:hover {
+      color: var(--text-primary);
+      transform: translateY(-2px);
+    }
+
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      width: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+      transition: all var(--transition-medium);
+      transform: translateX(-50%);
+    }
+
+    .nav-link:hover::after {
+      width: 70%;
+    }
+
+    .menu-toggle {
+      display: none;
+      font-size: 1.8rem;
+      cursor: pointer;
+      color: var(--text-primary);
+      transition: transform var(--transition-medium);
+    }
+
+    .menu-toggle:hover {
+      transform: scale(1.1);
+    }
+
+    .hide-toggle {
+      display: none;
+    }
+
+    @media (max-width: 768px) {
+      .navbar {
+        padding: 0.8rem 1.5rem;
+      }
+      
+      .menu-toggle {
+        display: block;
+      }
+
+      .nav-links {
+        position: fixed;
+        top: 0;
+        right: 0;
+        height: 100vh;
+        width: 70%;
+        flex-direction: column;
+        background-color: var(--darker-bg);
+        justify-content: center;
+        align-items: flex-start;
+        padding: 2rem;
+        transform: translateX(100%);
+        transition: transform var(--transition-medium);
+        z-index: 999;
+        box-shadow: -5px 0 15px rgba(0, 0, 0, 0.3);
+      }
+
+      .nav-links.show {
+        transform: translateX(0);
+      }
+
+      .hide-toggle {
+        display: block;
+        position: absolute;
+        top: 1.5rem;
+        right: 1.5rem;
+        cursor: pointer;
+        font-size: 2rem;
+        color: var(--text-primary);
+        transition: transform var(--transition-medium);
+      }
+
+      .hide-toggle:hover {
+        transform: rotate(90deg);
+      }
+
+      .nav-link {
+        width: 100%;
+        padding: 1rem 0;
+        margin-bottom: 0.5rem;
+        font-size: 1.1rem;
+        color: var(--text-primary);
+      }
+
+      .nav-link::after {
+        display: none;
+      }
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: #e9f0f4;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow-x: hidden;
+    }
+
+    body.show-output {
+      align-items: flex-start;
+    }
+
+    main {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex-grow: 1;
+      padding-top: 50px;
+      padding-bottom: 2rem;
+    }
+
+    .card {
+      background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+      padding: 2rem;
+      border-radius: 20px;
+      box-shadow: var(--card-shadow);
+      border: 1px solid rgba(0,0,0,0.1);
+      transition: all var(--transition-medium);
+      max-width: 450px;
+      width: calc(100% - 2rem);
+      margin: 2rem auto;
+      position: relative;
+      overflow: hidden;
+      animation: fadeInUp 0.8s ease-out;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 5px;
+      background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--card-shadow-hover);
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+      color: #333;
+      position: relative;
+      display: inline-block;
+    }
+
+    h1::after {
+      content: '';
+      position: absolute;
+      bottom: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 50px;
+      height: 3px;
+      background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+      border-radius: 3px;
+    }
+
+    label {
+      font-weight: 600;
+      margin-top: 1.2rem;
+      display: block;
+      color: #444;
+      transition: all var(--transition-medium);
+    }
+
+    label:hover {
+      color: #222;
+    }
+
+    input {
+      width: 100%;
+      padding: 0.8rem;
+      margin-top: 0.5rem;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+      box-sizing: border-box;
+      transition: all var(--transition-medium);
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    input:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(0, 120, 212, 0.2);
+      outline: none;
+    }
+
+    select {
+      width: 100%;
+      padding: 0.8rem;
+      margin-top: 0.5rem;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+      transition: all var(--transition-medium);
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right 0.8rem center;
+      background-size: 1rem;
+    }
+
+    select:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(0, 120, 212, 0.2);
+      outline: none;
+    }
+
+    button {
+      background: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 0.9rem 1.2rem;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 500;
+      margin-top: 1.5rem;
+      cursor: pointer;
+      width: 100%;
+      transition: all var(--transition-medium);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    button:hover {
+      background: #005a9e;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    .output {
+      text-align: center;
+      margin-top: 2rem;
+      padding: 1.5rem;
+      border-radius: 20px;
+      background: #ffffff !important;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      animation: fadeInUp var(--transition-medium);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .output::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 5px;
+      background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+    }
+
+    .wifi-name {
+      font-weight: bold;
+      margin-bottom: 1rem;
+      font-size: 1.3rem;
+      color: #000;
+      line-height: 1.4;
+    }
+
+    #qrcode-container {
+      background: white;
+      padding: 15px;
+      border-radius: 15px;
+      display: inline-block;
+      position: relative;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      margin: 1rem auto;
+      transition: all var(--transition-medium);
+    }
+
+    #qrcode-container:hover {
+      transform: scale(1.03);
+    }
+
+    #qrcode-container::before {
+      content: '';
+      position: absolute;
+      top: -5px; left: -5px; right: -5px; bottom: -5px;
+      border: 2px solid var(--primary-color);
+      border-radius: 20px;
+      z-index: -1;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { border-color: var(--primary-color); }
+      50% { border-color: var(--secondary-color); }
+      100% { border-color: var(--primary-color); }
+    }
+
+    #qrcode {
+      transition: transform var(--transition-slow);
+    }
+
+    #qrcode:hover {
+      transform: scale(1.05);
+    }
+
+    #downloadBtn {
+      margin-top: 1.5rem;
+      background: #28a745;
+    }
+
+    #downloadBtn:hover {
+      background: #1e7e34;
+    }
+
+    #resetBtn {
+      margin-top: 0.8rem;
+      background: #ff4757;
+    }
+
+    #resetBtn:hover {
+      background: #c0392b;
+    }
+
+    .password-strength {
+      margin-top: 0.8rem;
+    }
+
+    .strength-meter {
+      height: 6px;
+      background: #eee;
+      border-radius: 3px;
+      margin-bottom: 0.5rem;
+      overflow: hidden;
+      transition: all var(--transition-medium);
+    }
+
+    .strength-meter::after {
+      content: '';
+      display: block;
+      height: 100%;
+      width: 0;
+      background: #ff4757;
+      transition: all var(--transition-medium);
+    }
+
+    .strength-text {
+      font-size: 0.85rem;
+      color: #666;
+      text-align: left;
+    }
+
+    #strength-level {
+      font-weight: 600;
+    }
+
+    .advanced-toggle {
+      margin-top: 1.5rem;
+      cursor: pointer;
+      color: var(--primary-color);
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all var(--transition-medium);
+      padding: 0.5rem;
+      border-radius: 8px;
+    }
+
+    .advanced-toggle:hover {
+      background: rgba(0, 120, 212, 0.1);
+      transform: translateX(5px);
+    }
+
+    .advanced-options {
+      margin-top: 1rem;
+      padding: 1.2rem;
+      background: rgba(0,0,0,0.03);
+      border-radius: 12px;
+      display: none;
+      animation: fadeIn var(--transition-medium);
+    }
+
+    .advanced-options label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 0.8rem;
+      font-weight: normal;
+      cursor: pointer;
+    }
+
+    .social-share {
+      display: flex;
+      gap: 12px;
+      margin-top: 1.5rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .social-share button {
+      margin: 0;
+      width: auto;
+      padding: 0.7rem 1rem;
+      font-size: 0.9rem;
+      flex: 1;
+      min-width: 140px;
+      max-width: 200px;
+    }
+
+    .social-share .twitter {
+      background: #1DA1F2;
+    }
+
+    .social-share .twitter:hover {
+      background: #1991db;
+    }
+
+    .social-share .whatsapp {
+      background: #25D366;
+    }
+
+    .social-share .whatsapp:hover {
+      background: #1da851;
+    }
+
+    .social-share .copy {
+      background: #6c757d;
+    }
+
+    .social-share .copy:hover {
+      background: #5a6268;
+    }
+
+    input[type="color"] {
+      height: 45px;
+      width: 100%;
+      padding: 0;
+      cursor: pointer;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      transition: all var(--transition-medium);
+    }
+
+    input[type="color"]:hover {
+      transform: scale(1.02);
+    }
+
+    input[type="checkbox"] {
+      width: auto;
+      margin: 0;
+      transform: scale(1.2);
+      accent-color: var(--primary-color);
+    }
+
+    /* Loading animation */
+    .loader {
+      display: none;
+      width: 48px;
+      height: 48px;
+      margin: 1rem auto;
+      border: 5px solid #f3f3f3;
+      border-top: 5px solid var(--primary-color);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Toast notification */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 12px 24px;
+      border-radius: 8px;
+      z-index: 1000;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+    }
+
+    .toast.show {
+      opacity: 1;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 480px) {
+      .card {
+        padding: 1.5rem;
+        border-radius: 16px;
+      }
+      
+      h1 {
+        font-size: 1.3rem;
+      }
+      
+      button, input, select {
+        padding: 0.7rem;
+      }
+      
+      .social-share button {
+        min-width: 120px;
+        padding: 0.6rem;
+        font-size: 0.85rem;
+      }
+      
+      .navbar {
+        padding: 0.8rem 1rem;
+      }
+      
+      .navbar-brand a {
+        font-size: 1.3rem;
+      }
+    }
+
+    /* Animations */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* Tooltip */
+    .tooltip {
+      position: relative;
+      display: inline-block;
+    }
+
+    .tooltip .tooltiptext {
+      visibility: hidden;
+      width: 200px;
+      background-color: #333;
+      color: #fff;
+      text-align: center;
+      border-radius: 6px;
+      padding: 8px;
+      position: absolute;
+      z-index: 1;
+      bottom: 125%;
+      left: 50%;
+      transform: translateX(-50%);
+      opacity: 0;
+      transition: opacity var(--transition-medium);
+      font-size: 0.8rem;
+      font-weight: normal;
+    }
+
+    .tooltip:hover .tooltiptext {
+      visibility: visible;
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="navbar-container">
+      <div class="navbar-brand">
+        <a href="https://github.com/Dhaval915" target="_blank">
+          <svg class="github-logo" height="32" aria-hidden="true" viewBox="0 0 16 16" version="1.1" width="32" data-view-component="true">
+            <path fill="white" d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"></path>
+          </svg>
+          <span>Dhaval915</span>
+        </a>
+      </div>
+      <ul class="nav-links">
+        <i class="hide-toggle gg-close"></i>
+        <li class="nav-link"><a href="#">Home</a></li>
+        <li class="nav-link"><a href="https://github.com/Dhaval915" target="_blank">GitHub</a></li>
+        <li class="nav-link"><a href="#projects">Projects</a></li>
+        <li class="nav-link"><a href="#contact">Contact</a></li>
+      </ul>
+      <div class="menu-toggle"><i class="gg-menu-right"></i></div>
+    </div>
+  </nav>
+
+  <main>
+    <div class="card animate__animated animate__fadeIn">
+      <h1>📶 WiFi Card Generator</h1>
+
+      <label for="ssid">WiFi Name (SSID)</label>
+      <input type="text" id="ssid" placeholder="Enter WiFi name..." />
+
+      <label for="network-icon">Network Icon</label>
+      <select id="network-icon">
+        <option value="📶">Default (📶)</option>
+        <option value="🏠">Home (🏠)</option>
+        <option value="🏢">Office (🏢)</option>
+        <option value="☕">Cafe (☕)</option>
+        <option value="✈️">Travel (✈️)</option>
+      </select>
+
+      <label for="password">Password</label>
+      <input type="text" id="password" placeholder="Enter password..." />
+      
+      <div class="password-strength">
+        <div class="strength-meter"></div>
+        <div class="strength-text">Password Strength: <span id="strength-level">None</span></div>
+      </div>
+
+      <label for="encryption">Security Type</label>
+      <select id="encryption">
+        <option value="WPA">WPA/WPA2</option>
+        <option value="WEP">WEP</option>
+        <option value="nopass">None</option>
+      </select>
+
+      <div class="advanced-toggle" onclick="toggleAdvanced()">
+        <span>⚙️ Advanced Options</span>
+      </div>
+
+      <div class="advanced-options" style="display: none;">
+        <label for="card-color">Card Color</label>
+        <input type="color" id="card-color" value="#ffffff">
+
+        <label for="text-color">Text Color</label>
+        <input type="color" id="text-color" value="#000000">
+
+        <label>
+          <input type="checkbox" id="hide-password"> Hide password in QR code
+        </label>
+      </div>
+
+      <button onclick="generateQR()">
+        <span id="generate-text">Generate WiFi Card</span>
+        <div class="loader" id="generate-loader"></div>
+      </button>
+
+      <div class="output" id="output" style="display: none;">
+        <div class="wifi-name" id="displaySSID"></div>
+        <div id="qrcode-container">
+          <canvas id="qrcode"></canvas>
+        </div>
+        <button id="downloadBtn" onclick="downloadCard()">
+          <span id="download-text">Download WiFi Card</span>
+          <div class="loader" id="download-loader"></div>
+        </button>
+        <button id="resetBtn" onclick="resetForm()">Generate Another</button>
+        <div class="social-share">
+          <button onclick="shareOnTwitter()" class="twitter">Share on Twitter</button>
+          <button onclick="shareOnWhatsApp()" class="whatsapp">Share on WhatsApp</button>
+          <button onclick="copyLink()" class="copy">Copy Link</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // Navbar scroll effect
+    window.addEventListener('scroll', function() {
+      const navbar = document.querySelector('.navbar');
+      if (window.scrollY > 10) {
+        navbar.classList.add('scrolled');
+      } else {
+        navbar.classList.remove('scrolled');
+      }
+    });
+
+    // Navbar toggle for mobile
+    const menuToggle = document.querySelector('.menu-toggle');
+    const navLinks = document.querySelector('.nav-links');
+    const hideToggle = document.querySelector('.hide-toggle');
+
+    menuToggle.addEventListener('click', () => {
+      navLinks.classList.add('show');
+      document.body.style.overflow = 'hidden';
+    });
+
+    hideToggle.addEventListener('click', () => {
+      navLinks.classList.remove('show');
+      document.body.style.overflow = '';
+    });
+
+    document.querySelectorAll('.nav-link').forEach(link => {
+      link.addEventListener('click', () => {
+        navLinks.classList.remove('show');
+        document.body.style.overflow = '';
+      });
+    });
+
+    // Password strength meter
+    document.getElementById("password").addEventListener("input", function() {
+      const password = this.value;
+      const meter = document.querySelector(".strength-meter");
+      const text = document.getElementById("strength-level");
+      
+      let strength = 0;
+      if (password.length > 0) strength++;
+      if (password.length >= 8) strength++;
+      if (/[A-Z]/.test(password)) strength++;
+      if (/[0-9]/.test(password)) strength++;
+      if (/[^A-Za-z0-9]/.test(password)) strength++;
+      
+      const colors = ["#ff4757", "#ff6b81", "#ffa502", "#2ed573", "#1dd1a1"];
+      const labels = ["Very Weak", "Weak", "Medium", "Strong", "Very Strong"];
+      
+      meter.style.width = `${strength * 20}%`;
+      meter.style.background = colors[strength - 1] || "#eee";
+      text.textContent = labels[strength - 1] || "None";
+      text.style.color = colors[strength - 1] || "#333";
+    });
+
+    // Advanced options toggle
+    function toggleAdvanced() {
+      const adv = document.querySelector('.advanced-options');
+      adv.style.display = adv.style.display === 'none' ? 'block' : 'none';
+    }
+
+    // Show toast notification
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+
+    // Generate QR code
+    function generateQR() {
+      const ssid = document.getElementById("ssid").value.trim();
+      const password = document.getElementById("password").value;
+      const encryption = document.getElementById("encryption").value;
+      const icon = document.getElementById("network-icon").value;
+      const hidePassword = document.getElementById("hide-password").checked;
+      
+      if (!ssid) {
+        showToast("Please enter a WiFi name (SSID)");
+        return;
+      }
+
+      // Show loading state
+      const generateText = document.getElementById("generate-text");
+      const generateLoader = document.getElementById("generate-loader");
+      generateText.style.display = "none";
+      generateLoader.style.display = "block";
+
+      const displayPassword = hidePassword ? '*'.repeat(password.length) : password;
+      const qrText = `WIFI:T:${encryption};S:${ssid};P:${password};;`;
+
+      QRCode.toCanvas(document.getElementById("qrcode"), qrText, {
+        width: 200,
+        color: {
+          dark: "#0078d4",
+          light: "#ffffff00"
+        },
+        margin: 1
+      }, function(error) {
+        // Hide loading state
+        generateText.style.display = "inline";
+        generateLoader.style.display = "none";
+
+        if (error) {
+          console.error(error);
+          showToast("Error generating QR code");
+        } else {
+          document.getElementById("displaySSID").innerHTML = `WiFi: ${icon} ${ssid}<br>Password: ${displayPassword}`;
+          const output = document.getElementById("output");
+          output.style.display = 'block';
+          document.body.classList.add("show-output");
+          output.scrollIntoView({ behavior: "smooth" });
+          showToast("WiFi card generated successfully!");
+        }
+      });
+    }
+
+    // Download card
+    async function downloadCard() {
+      const output = document.getElementById("output");
+      const downloadBtn = document.getElementById("downloadBtn");
+      const resetBtn = document.getElementById("resetBtn");
+      const ssid = document.getElementById("ssid").value.trim().replace(/\s+/g, '_') || "WiFi_Card";
+      const cardColor = document.getElementById("card-color").value;
+      const textColor = document.getElementById("text-color").value;
+      
+      // Show loading state
+      const downloadText = document.getElementById("download-text");
+      const downloadLoader = document.getElementById("download-loader");
+      downloadText.style.display = "none";
+      downloadLoader.style.display = "block";
+
+      // Apply temporary styles
+      output.style.backgroundColor = cardColor;
+      const wifiName = output.querySelector(".wifi-name");
+      wifiName.style.color = textColor;
+      downloadBtn.style.display = "none";
+      resetBtn.style.display = "none";
+      document.querySelector('.social-share').style.display = "none";
+
+      try {
+        const canvas = await html2canvas(output, {
+          backgroundColor: cardColor,
+          useCORS: true,
+          scale: 2
+        });
+
+        // Restore elements
+        downloadText.style.display = "inline";
+        downloadLoader.style.display = "none";
+        downloadBtn.style.display = "block";
+        resetBtn.style.display = "block";
+        document.querySelector('.social-share').style.display = "flex";
+        output.style.backgroundColor = "";
+        wifiName.style.color = "";
+
+        const link = document.createElement("a");
+        link.href = canvas.toDataURL("image/png");
+        link.download = `WiFi_Card_${ssid}.png`;
+        link.click();
+        showToast("Download started!");
+      } catch (error) {
+        console.error("Download error:", error);
+        showToast("Error generating download");
+        // Ensure elements are restored even if error occurs
+        downloadText.style.display = "inline";
+        downloadLoader.style.display = "none";
+        downloadBtn.style.display = "block";
+        resetBtn.style.display = "block";
+        document.querySelector('.social-share').style.display = "flex";
+        output.style.backgroundColor = "";
+        wifiName.style.color = "";
+      }
+    }
+
+    // Social sharing
+    let generatedImageUrl = null;
+
+    async function shareOnTwitter() {
+      try {
+        const ssid = document.getElementById("ssid").value.trim();
+        const text = `Check out this WiFi QR code I generated for ${ssid} using @Dhaval915's awesome tool! ${window.location.href}`;
+        
+        window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, '_blank');
+        showToast("Opening Twitter...");
+      } catch (error) {
+        console.error("Error sharing to Twitter:", error);
+        showToast("Error sharing to Twitter");
+      }
+    }
+
+    async function shareOnWhatsApp() {
+      try {
+        const ssid = document.getElementById("ssid").value.trim();
+        const text = `Check out this WiFi QR code I generated for ${ssid}! ${window.location.href}`;
+        
+        window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+        showToast("Opening WhatsApp...");
+      } catch (error) {
+        console.error("Error sharing to WhatsApp:", error);
+        showToast("Error sharing to WhatsApp");
+      }
+    }
+
+    function copyLink() {
+      navigator.clipboard.writeText(window.location.href)
+        .then(() => {
+          showToast("Link copied to clipboard!");
+        })
+        .catch(err => {
+          console.error("Could not copy text: ", err);
+          showToast("Failed to copy link");
+        });
+    }
+
+    // Reset form
+    function resetForm() {
+      document.getElementById("ssid").value = "";
+      document.getElementById("password").value = "";
+      document.getElementById("encryption").value = "WPA";
+      document.getElementById("network-icon").value = "📶";
+      document.getElementById("card-color").value = "#ffffff";
+      document.getElementById("text-color").value = "#000000";
+      document.getElementById("hide-password").checked = false;
+      document.querySelector(".advanced-options").style.display = "none";
+      
+      document.getElementById("output").style.display = "none";
+      const ctx = document.getElementById("qrcode").getContext('2d');
+      ctx.clearRect(0, 0, 300, 300);
+      document.body.classList.remove("show-output");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      
+      // Reset password strength
+      document.querySelector(".strength-meter").style.width = "0";
+      document.getElementById("strength-level").textContent = "None";
+      document.getElementById("strength-level").style.color = "#333";
+      
+      // Reset generated image URL
+      generatedImageUrl = null;
+      
+      showToast("Form reset successfully!");
+    }
+
+    // Initialize the app
+    document.addEventListener('DOMContentLoaded', function() {
+      // Add any initialization code here if needed
+    });
+  </script>
+</body>
+</html>
