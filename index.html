@@ -2,22 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>WiFi Card Generator</title>
   <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-  <link href="https://css.gg/menu-right.css" rel="stylesheet">
-  <link href="https://css.gg/close.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
-  <script>
-    document.addEventListener('contextmenu', event => event.preventDefault());
-    document.onkeydown = function(e) {
-      if (e.keyCode === 123) return false; // F12
-      if (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74)) return false; // Ctrl+Shift+I or J
-      if (e.ctrlKey && e.keyCode === 85) return false; // Ctrl+U
-      if (e.ctrlKey && e.keyCode === 83) return false; // Ctrl+S
-    };
-  </script>
   <style>
     :root {
       --primary-color: #0078d4;
@@ -37,6 +27,10 @@
       scroll-behavior: smooth;
     }
 
+    * {
+      box-sizing: border-box;
+    }
+
     /* Navbar */
     .navbar {
       background-color: rgba(10, 10, 10, 0.9);
@@ -50,7 +44,6 @@
       backdrop-filter: blur(10px);
       border-bottom: 1px solid rgba(255, 255, 255, 0.05);
       width: 100%;
-      box-sizing: border-box;
       transition: all var(--transition-medium);
     }
 
@@ -157,6 +150,10 @@
       cursor: pointer;
       color: var(--text-primary);
       transition: transform var(--transition-medium);
+      z-index: 1001;
+      background: none;
+      border: none;
+      padding: 0.5rem;
     }
 
     .menu-toggle:hover {
@@ -165,6 +162,22 @@
 
     .hide-toggle {
       display: none;
+      background: none;
+      border: none;
+      color: var(--text-primary);
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+
+    .menu-backdrop {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 998;
     }
 
     @media (max-width: 768px) {
@@ -181,12 +194,12 @@
         top: 0;
         right: 0;
         height: 100vh;
-        width: 70%;
+        width: 280px;
         flex-direction: column;
         background-color: var(--darker-bg);
-        justify-content: center;
+        justify-content: flex-start;
         align-items: flex-start;
-        padding: 2rem;
+        padding: 80px 2rem 2rem;
         transform: translateX(100%);
         transition: transform var(--transition-medium);
         z-index: 999;
@@ -197,15 +210,20 @@
         transform: translateX(0);
       }
 
+      .menu-backdrop.show {
+        display: block;
+      }
+
       .hide-toggle {
         display: block;
         position: absolute;
         top: 1.5rem;
         right: 1.5rem;
         cursor: pointer;
-        font-size: 2rem;
+        font-size: 1.5rem;
         color: var(--text-primary);
         transition: transform var(--transition-medium);
+        padding: 0.5rem;
       }
 
       .hide-toggle:hover {
@@ -225,6 +243,7 @@
       }
     }
 
+    /* Rest of your CSS remains the same */
     body {
       font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
       background: #e9f0f4;
@@ -239,6 +258,10 @@
 
     body.show-output {
       align-items: flex-start;
+    }
+
+    body.menu-open {
+      overflow: hidden;
     }
 
     main {
@@ -643,20 +666,27 @@
       .card {
         padding: 1.5rem;
         border-radius: 16px;
+        margin: 1rem auto;
       }
       
       h1 {
         font-size: 1.3rem;
+        margin-bottom: 1.2rem;
       }
       
       button, input, select {
         padding: 0.7rem;
+        font-size: 0.95rem;
+      }
+      
+      .social-share {
+        flex-direction: column;
+        align-items: center;
       }
       
       .social-share button {
-        min-width: 120px;
-        padding: 0.6rem;
-        font-size: 0.85rem;
+        width: 100%;
+        max-width: none;
       }
       
       .navbar {
@@ -665,6 +695,14 @@
       
       .navbar-brand a {
         font-size: 1.3rem;
+      }
+      
+      .output {
+        padding: 1.2rem;
+      }
+      
+      #qrcode-container {
+        padding: 10px;
       }
     }
 
@@ -729,15 +767,17 @@
         </a>
       </div>
       <ul class="nav-links">
-        <i class="hide-toggle gg-close"></i>
-        <li class="nav-link"><a href="https://web-delta-mauve.vercel.app/">Home</a></li>
+        <button class="hide-toggle"><i class="fas fa-times"></i></button>
+        <li class="nav-link"><a href="#">Home</a></li>
         <li class="nav-link"><a href="https://github.com/Dhaval915" target="_blank">GitHub</a></li>
-        <li class="nav-link"><a href="https://web-delta-mauve.vercel.app/#projects">Projects</a></li>
-        <li class="nav-link"><a href="https://web-delta-mauve.vercel.app/#contact">Contact</a></li>
+        <li class="nav-link"><a href="#projects">Projects</a></li>
+        <li class="nav-link"><a href="#contact">Contact</a></li>
       </ul>
-      <div class="menu-toggle"><i class="gg-menu-right"></i></div>
+      <button class="menu-toggle"><i class="fas fa-bars"></i></button>
     </div>
   </nav>
+  
+  <div class="menu-backdrop"></div>
 
   <main>
     <div class="card animate__animated animate__fadeIn">
@@ -823,25 +863,35 @@
       }
     });
 
-    // Navbar toggle for mobile
+    // Navbar toggle for mobile - FIXED VERSION
     const menuToggle = document.querySelector('.menu-toggle');
     const navLinks = document.querySelector('.nav-links');
     const hideToggle = document.querySelector('.hide-toggle');
+    const backdrop = document.querySelector('.menu-backdrop');
 
-    menuToggle.addEventListener('click', () => {
-      navLinks.classList.add('show');
-      document.body.style.overflow = 'hidden';
-    });
+    function toggleMenu() {
+      const isMenuOpen = navLinks.classList.contains('show');
+      
+      if (isMenuOpen) {
+        navLinks.classList.remove('show');
+        backdrop.classList.remove('show');
+        document.body.classList.remove('menu-open');
+      } else {
+        navLinks.classList.add('show');
+        backdrop.classList.add('show');
+        document.body.classList.add('menu-open');
+      }
+    }
 
-    hideToggle.addEventListener('click', () => {
-      navLinks.classList.remove('show');
-      document.body.style.overflow = '';
-    });
+    menuToggle.addEventListener('click', toggleMenu);
+    hideToggle.addEventListener('click', toggleMenu);
+    backdrop.addEventListener('click', toggleMenu);
 
     document.querySelectorAll('.nav-link').forEach(link => {
       link.addEventListener('click', () => {
         navLinks.classList.remove('show');
-        document.body.style.overflow = '';
+        backdrop.classList.remove('show');
+        document.body.classList.remove('menu-open');
       });
     });
 
