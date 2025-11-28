@@ -3,1116 +3,702 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>WiFi Card Generator</title>
+  <title>Connect | Professional WiFi Card Generator</title>
+  
   <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
   <style>
     :root {
-      --primary-color: #0078d4;
-      --secondary-color: #00b4ff;
-      --text-primary: #ffffff;
-      --text-secondary: rgba(255, 255, 255, 0.8);
-      --darker-bg: #0a0a0a;
-      --card-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-      --card-shadow-hover: 0 12px 28px rgba(0, 0, 0, 0.2);
-      --transition-fast: 0.2s ease;
-      --transition-medium: 0.3s ease;
-      --transition-slow: 0.4s ease;
+      --bg-color: #0f172a;
+      --card-bg: rgba(30, 41, 59, 0.7);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --primary: #3b82f6;
+      --primary-hover: #2563eb;
+      --accent: #8b5cf6;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --success: #10b981;
+      --danger: #ef4444;
+      --radius: 16px;
+      --shadow: 0 10px 40px -10px rgba(0,0,0,0.5);
     }
 
-    /* Smooth scrolling */
-    html {
-      scroll-behavior: smooth;
-    }
+    /* Base Reset */
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
+    
+    html { scroll-behavior: smooth; }
 
-    * {
-      box-sizing: border-box;
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg-color);
+      background-image: 
+        radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
+        radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
+        radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
+      background-attachment: fixed;
+      color: var(--text-main);
+      min-height: 100vh;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
     }
 
     /* Navbar */
     .navbar {
-      background-color: rgba(10, 10, 10, 0.9);
-      padding: 1rem 2rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      padding: 1.25rem 2rem;
+      width: 100%;
+      max-width: 1400px;
+      margin: 0 auto;
+      backdrop-filter: blur(10px);
       position: sticky;
       top: 0;
-      z-index: 1000;
-      backdrop-filter: blur(10px);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-      width: 100%;
-      transition: all var(--transition-medium);
+      z-index: 100;
+      background: rgba(15, 23, 42, 0.6);
+      border-bottom: 1px solid rgba(255,255,255,0.05);
     }
 
-    .navbar.scrolled {
-      padding: 0.8rem 2rem;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    .brand {
+      font-size: 1.4rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
 
-    .navbar-container {
+    .github-link {
+      color: var(--text-main);
+      font-size: 1.4rem;
+      transition: transform 0.3s ease;
+      padding: 5px;
+    }
+    .github-link:hover { transform: rotate(15deg) scale(1.1); color: var(--primary); }
+
+    /* Layout */
+    .container {
       width: 100%;
       max-width: 1200px;
       margin: 0 auto;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      padding: 2rem 1.5rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      align-items: start;
+      flex: 1;
     }
 
-    .navbar-brand {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .navbar-brand a {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-weight: 600;
-      font-size: 1.5rem;
-      background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-      letter-spacing: 0.5px;
-      text-decoration: none;
-      transition: all var(--transition-medium);
-    }
-
-    .navbar-brand a:hover {
-      transform: scale(1.05);
-    }
-
-    .github-logo {
-      width: 32px;
-      height: 32px;
-      transition: transform var(--transition-medium);
-    }
-
-    .github-logo:hover {
-      transform: rotate(10deg) scale(1.1);
-    }
-
-    .nav-links {
-      display: flex;
-      gap: 1.5rem;
-      list-style: none;
-      margin: 0;
-      padding: 0;
-    }
-
-    .nav-link {
-      padding: 0.5rem 1rem;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: 500;
-      font-size: 0.95rem;
-      transition: all var(--transition-medium);
-      position: relative;
-      color: var(--text-secondary);
-    }
-
-    .nav-link a {
-      color: inherit;
-      text-decoration: none;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
-
-    .nav-link:hover {
-      color: var(--text-primary);
-      transform: translateY(-2px);
-    }
-
-    .nav-link::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 50%;
-      width: 0;
-      height: 2px;
-      background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
-      transition: all var(--transition-medium);
-      transform: translateX(-50%);
-    }
-
-    .nav-link:hover::after {
-      width: 70%;
-    }
-
-    .menu-toggle {
-      margin-top: 4px;
-      width : auto;
-      display: none;
-      font-size: 1.8rem;
-      cursor: pointer;
-      color: var(--text-primary);
-      transition: transform var(--transition-medium);
-      z-index: 1001;
-      background: none;
-      border: none;
-      padding: 0.5rem;
-    }
-
-    .menu-toggle:hover {
-      transform: scale(1.1);
-    }
-
-    .hide-toggle {
-      display: none;
-      background: none;
-      border: none;
-      color: var(--text-primary);
-      font-size: 1.5rem;
-      cursor: pointer;
-    }
-
-    .menu-backdrop {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0,0,0,0.5);
-      z-index: 998;
-    }
-
-    @media (max-width: 768px) {
-      .navbar {
-        padding: 0.8rem 1.5rem;
-      }
-      
-      .menu-toggle {
-        display: block;
-      }
-
-      .nav-links {
-        position: fixed;
-        top: 0;
-        right: 0;
-        height: 100vh;
-        width: 280px;
-        flex-direction: column;
-        background-color: var(--darker-bg);
-        justify-content: flex-start;
-        align-items: flex-start;
-        padding: 80px 2rem 2rem;
-        transform: translateX(100%);
-        transition: transform var(--transition-medium);
-        z-index: 999;
-        box-shadow: -5px 0 15px rgba(0, 0, 0, 0.3);
-      }
-
-      .nav-links.show {
-        transform: translateX(0);
-      }
-
-      .menu-backdrop.show {
-        display: block;
-      }
-
-      .hide-toggle {
-        display: block;
-        position: absolute;
-        top: 1.5rem;
-        right: 1.5rem;
-        cursor: pointer;
-        font-size: 1.5rem;
-        color: var(--text-primary);
-        transition: transform var(--transition-medium);
-        padding: 0.5rem;
-      }
-
-      .hide-toggle:hover {
-        transform: rotate(90deg);
-      }
-
-      .nav-link {
-        width: 100%;
-        padding: 1rem 0;
-        margin-bottom: 0.5rem;
-        font-size: 1.1rem;
-        color: var(--text-primary);
-      }
-
-      .nav-link::after {
-        display: none;
-      }
-    }
-
-    /* Rest of your CSS remains the same */
-    body {
-      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-      background: #e9f0f4;
-      margin: 0;
-      padding: 0;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      overflow-x: hidden;
-    }
-
-    body.show-output {
-      align-items: flex-start;
-    }
-
-    body.menu-open {
-      overflow: hidden;
-    }
-
-    main {
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      flex-grow: 1;
-      padding-top: 50px;
-      padding-bottom: 2rem;
-    }
-
-    .card {
-      background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    /* Controls Panel */
+    .controls-panel {
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border);
       padding: 2rem;
-      border-radius: 20px;
-      box-shadow: var(--card-shadow);
-      border: 1px solid rgba(0,0,0,0.1);
-      transition: all var(--transition-medium);
-      max-width: 450px;
-      width: calc(100% - 2rem);
-      margin: 2rem auto;
-      position: relative;
-      overflow: hidden;
-      animation: fadeInUp 0.8s ease-out;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      animation: slideInLeft 0.5s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    .card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 5px;
-      background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
-    }
+    h2 { font-size: 1.2rem; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 10px; }
+    h2 i { color: var(--primary); }
 
-    .card:hover {
-      transform: translateY(-5px);
-      box-shadow: var(--card-shadow-hover);
-    }
-
-    h1 {
-      font-size: 1.5rem;
-      margin-bottom: 1.5rem;
-      text-align: center;
-      color: #333;
-      position: relative;
-      display: inline-block;
-    }
-
-    h1::after {
-      content: '';
-      position: absolute;
-      bottom: -8px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 50px;
-      height: 3px;
-      background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
-      border-radius: 3px;
-    }
-
+    .form-group { margin-bottom: 1.25rem; }
+    
     label {
-      font-weight: 600;
-      margin-top: 1.2rem;
       display: block;
-      color: #444;
-      transition: all var(--transition-medium);
-    }
-
-    label:hover {
-      color: #222;
-    }
-
-    input {
-      width: 100%;
-      padding: 0.8rem;
-      margin-top: 0.5rem;
-      border-radius: 10px;
-      border: 1px solid #ccc;
-      font-size: 1rem;
-      box-sizing: border-box;
-      transition: all var(--transition-medium);
-      box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
-    }
-
-    input:focus {
-      border-color: var(--primary-color);
-      box-shadow: 0 0 0 3px rgba(0, 120, 212, 0.2);
-      outline: none;
-    }
-
-    select {
-      width: 100%;
-      padding: 0.8rem;
-      margin-top: 0.5rem;
-      border-radius: 10px;
-      border: 1px solid #ccc;
-      font-size: 1rem;
-      transition: all var(--transition-medium);
-      box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
-      cursor: pointer;
-      appearance: none;
-      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-      background-repeat: no-repeat;
-      background-position: right 0.8rem center;
-      background-size: 1rem;
-    }
-
-    select:focus {
-      border-color: var(--primary-color);
-      box-shadow: 0 0 0 3px rgba(0, 120, 212, 0.2);
-      outline: none;
-    }
-
-    button {
-      background: var(--primary-color);
-      color: white;
-      border: none;
-      padding: 0.9rem 1.2rem;
-      border-radius: 10px;
-      font-size: 1rem;
+      font-size: 0.85rem;
       font-weight: 500;
-      margin-top: 1.5rem;
-      cursor: pointer;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+    }
+
+    input[type="text"], select {
       width: 100%;
-      transition: all var(--transition-medium);
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid var(--glass-border);
+      color: var(--text-main);
+      padding: 0.9rem 1rem;
+      border-radius: 10px;
+      font-size: 1rem;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+      background: rgba(0, 0, 0, 0.3);
+    }
+
+    /* Checkbox Style */
+    .checkbox-wrapper {
       display: flex;
       align-items: center;
-      justify-content: center;
-      gap: 8px;
+      gap: 12px;
+      cursor: pointer;
+      margin-top: 10px;
+      padding: 5px 0;
+    }
+    .checkbox-wrapper input {
+      accent-color: var(--primary);
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
     }
 
-    button:hover {
-      /* background: #005a9e; */
-      transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-
-    button:active {
-      transform: translateY(0);
-    }
-
-    .output {
-      text-align: center;
-      margin-top: 2rem;
-      padding: 1.5rem;
-      border-radius: 20px;
-      background: #ffffff !important;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      animation: fadeInUp var(--transition-medium);
-      position: relative;
+    /* Password Strength */
+    .strength-bar {
+      height: 4px;
+      background: rgba(255,255,255,0.1);
+      margin-top: 8px;
+      border-radius: 2px;
       overflow: hidden;
+      display: flex;
     }
-
-    .output::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 5px;
-      background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
-    }
-
-    .wifi-name {
-      font-weight: bold;
-      margin-bottom: 1rem;
-      font-size: 1.3rem;
-      color: #000;
-      line-height: 1.4;
-    }
-
-    #qrcode-container {
-      background: white;
-      padding: 15px;
-      border-radius: 15px;
-      display: inline-block;
-      position: relative;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      margin: 1rem auto;
-      transition: all var(--transition-medium);
-    }
-
-    #qrcode-container:hover {
-      transform: scale(1.03);
-    }
-
-    #qrcode-container::before {
-      content: '';
-      position: absolute;
-      top: -5px; left: -5px; right: -5px; bottom: -5px;
-      border: 2px solid var(--primary-color);
-      border-radius: 20px;
-      z-index: -1;
-      animation: pulse 2s infinite;
-    }
-
-    @keyframes pulse {
-      0% { border-color: var(--primary-color); }
-      50% { border-color: var(--secondary-color); }
-      100% { border-color: var(--primary-color); }
-    }
-
-    #qrcode {
-      transition: transform var(--transition-slow);
-    }
-
-    #qrcode:hover {
-      transform: scale(1.05);
-    }
-
-    #downloadBtn {
-      margin-top: 1.5rem;
-      background: #28a745;
-    }
-
-    #downloadBtn:hover {
-      background: #1e7e34;
-    }
-
-    #resetBtn {
-      margin-top: 0.8rem;
-      background: #ff4757;
-    }
-
-    #resetBtn:hover {
-      background: #c0392b;
-    }
-
-    .password-strength {
-      margin-top: 0.8rem;
-    }
-
-    .strength-meter {
-      height: 6px;
-      background: #eee;
-      border-radius: 3px;
-      margin-bottom: 0.5rem;
-      overflow: hidden;
-      transition: all var(--transition-medium);
-    }
-
-    .strength-meter::after {
-      content: '';
-      display: block;
+    .strength-fill {
       height: 100%;
       width: 0;
-      background: #ff4757;
-      transition: all var(--transition-medium);
+      transition: width 0.3s ease, background-color 0.3s ease;
     }
 
-    .strength-text {
-      font-size: 0.85rem;
-      color: #666;
-      text-align: left;
-    }
-
-    #strength-level {
-      font-weight: 600;
-    }
-
-    .advanced-toggle {
-      margin-top: 1.5rem;
-      cursor: pointer;
-      color: var(--primary-color);
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      transition: all var(--transition-medium);
-      padding: 0.5rem;
-      border-radius: 8px;
-    }
-
-    .advanced-toggle:hover {
-      background: rgba(0, 120, 212, 0.1);
-      transform: translateX(5px);
-    }
-
-    .advanced-options {
-      margin-top: 1rem;
-      padding: 1.2rem;
-      background: rgba(0,0,0,0.03);
-      border-radius: 12px;
-      display: none;
-      animation: fadeIn var(--transition-medium);
-    }
-
-    .advanced-options label {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 0.8rem;
-      font-weight: normal;
-      cursor: pointer;
-    }
-
-    .social-share {
-      display: flex;
-      gap: 12px;
-      margin-top: 1.5rem;
-      justify-content: center;
-      flex-wrap: wrap;
-    }
-
-    .social-share button {
-      margin: 0;
-      width: auto;
-      padding: 0.7rem 1rem;
-      font-size: 0.9rem;
-      flex: 1;
-      min-width: 140px;
-      max-width: 200px;
-    }
-
-    .social-share .twitter {
-      background: #1DA1F2;
-    }
-
-    .social-share .twitter:hover {
-      background: #1991db;
-    }
-
-    .social-share .whatsapp {
-      background: #25D366;
-    }
-
-    .social-share .whatsapp:hover {
-      background: #1da851;
-    }
-
-    .social-share .copy {
-      background: #6c757d;
-    }
-
-    .social-share .copy:hover {
-      background: #5a6268;
-    }
-
-    input[type="color"] {
-      height: 45px;
+    /* Buttons */
+    .btn {
       width: 100%;
-      padding: 0;
+      padding: 1rem;
+      border: none;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 1rem;
       cursor: pointer;
-      border-radius: 8px;
-      border: 1px solid #ddd;
-      transition: all var(--transition-medium);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: transform 0.1s, box-shadow 0.2s;
+      touch-action: manipulation;
     }
 
-    input[type="color"]:hover {
-      transform: scale(1.02);
-    }
-
-    input[type="checkbox"] {
-      width: auto;
-      margin: 0;
-      transform: scale(1.2);
-      accent-color: var(--primary-color);
-    }
-
-    /* Loading animation */
-    .loader {
-      display: none;
-      width: 48px;
-      height: 48px;
-      margin: 1rem auto;
-      border: 5px solid #f3f3f3;
-      border-top: 5px solid var(--primary-color);
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    /* Toast notification */
-    .toast {
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(0, 0, 0, 0.8);
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--accent));
       color: white;
-      padding: 12px 24px;
-      border-radius: 8px;
-      z-index: 1000;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-      pointer-events: none;
+      box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+    }
+    .btn-primary:active { transform: scale(0.98); }
+
+    .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem; }
+    
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--glass-border);
+      color: var(--text-muted);
+    }
+    .btn-outline:hover { background: rgba(255,255,255,0.05); color: var(--text-main); }
+    .btn-outline:active { transform: scale(0.98); }
+
+    /* Preview Section */
+    .preview-panel {
+      position: sticky;
+      top: 6rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      animation: slideInRight 0.5s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    .toast.show {
-      opacity: 1;
+    /* --- WIFI CARD REDESIGN --- */
+    #wifi-card {
+      width: 100%;
+      max-width: 380px;
+      /* Dynamic Aspect Ratio for better mobile fit */
+      min-height: 520px;
+      background: #ffffff;
+      border-radius: 24px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 20px 50px -10px rgba(0,0,0,0.5);
+      color: #1e293b;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 0;
+      transition: transform 0.3s ease;
     }
 
-    /* Responsive adjustments */
-    @media (max-width: 480px) {
-      .card {
-        padding: 1.5rem;
-        border-radius: 16px;
-        margin: 1rem auto;
+    .card-header-bg {
+      width: 100%;
+      height: 160px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      border-bottom-left-radius: 50% 30px;
+      border-bottom-right-radius: 50% 30px;
+      position: absolute;
+      top: 0; left: 0;
+      z-index: 1;
+    }
+
+    .card-content {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1.5rem;
+    }
+
+    .network-icon-display {
+      width: 72px;
+      height: 72px;
+      background: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.2rem;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+      margin-top: 25px;
+      margin-bottom: 1.25rem;
+      color: #0f172a;
+    }
+
+    .ssid-display { 
+      font-size: 1.5rem; 
+      font-weight: 800; 
+      margin-bottom: 0.5rem; 
+      line-height: 1.2;
+      color: #0f172a;
+      max-width: 100%;
+      word-wrap: break-word;
+      padding: 0 10px;
+    }
+    
+    .pass-display { 
+      font-size: 0.9rem; 
+      color: #64748b; 
+      font-family: 'Courier New', monospace; 
+      background: #f1f5f9; 
+      padding: 6px 14px; 
+      border-radius: 12px; 
+      display: inline-block;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      margin-bottom: auto; /* Pushes QR code to bottom */
+    }
+
+    .qr-frame {
+      margin-top: 1.5rem;
+      background: white;
+      padding: 10px;
+      border-radius: 16px;
+      border: 2px dashed #cbd5e1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .scan-me-text {
+      margin-top: 1rem;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #94a3b8;
+      font-weight: 700;
+    }
+
+    /* --- RESPONSIVE BREAKPOINTS --- */
+    
+    /* Tablet (Max Width 1024px) */
+    @media (max-width: 1024px) {
+      .container {
+        gap: 2rem;
       }
-      
-      h1 {
-        font-size: 1.3rem;
-        margin-bottom: 1.2rem;
+      #wifi-card {
+        max-width: 340px;
       }
-      
-      button, input, select {
-        padding: 0.7rem;
-        font-size: 0.95rem;
-      }
-      
-      .social-share {
-        flex-direction: column;
-        align-items: center;
-      }
-      
-      .social-share button {
-        width: 100%;
-        max-width: none;
-      }
-      
+    }
+
+    /* Mobile (Max Width 900px) - Switches to Single Column */
+    @media (max-width: 900px) {
       .navbar {
-        padding: 0.8rem 1rem;
+        padding: 1rem 1.5rem;
       }
       
-      .navbar-brand a {
+      .container {
+        grid-template-columns: 1fr; /* Stack vertically */
+        padding: 1.5rem;
+        gap: 3rem;
+      }
+
+      /* Control panel usually comes first in DOM, so it stays on top */
+      .controls-panel {
+        order: 1; /* Explicitly keep controls first for better typing flow */
+      }
+      
+      .preview-panel {
+        order: 2; /* Preview below controls on mobile */
+        position: static; /* Remove sticky on mobile */
+        transform: none;
+      }
+
+      #wifi-card {
+        max-width: 100%; /* Use full width available */
+        width: 320px; /* Optimal width for phone screens */
+        min-height: auto;
+        aspect-ratio: 1/1.5;
+      }
+    }
+
+    /* Small Mobile (Max Width 480px) */
+    @media (max-width: 480px) {
+      .container {
+        padding: 1rem;
+        gap: 2rem;
+      }
+      
+      .controls-panel {
+        padding: 1.5rem 1.25rem;
+      }
+
+      .btn-group {
+        grid-template-columns: 1fr; /* Stack buttons vertically */
+      }
+
+      #wifi-card {
+        width: 100%; 
+        border-radius: 20px;
+      }
+      
+      .ssid-display {
         font-size: 1.3rem;
-      }
-      
-      .output {
-        padding: 1.2rem;
-      }
-      
-      #qrcode-container {
-        padding: 10px;
       }
     }
 
     /* Animations */
-    @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+    @keyframes slideInLeft { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes slideInRight { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    
+    /* Toast */
+    .toast {
+      position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(100px);
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid var(--glass-border);
+      color: white; padding: 12px 24px; border-radius: 50px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      opacity: 0; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      z-index: 2000; font-size: 0.9rem; display: flex; align-items: center; gap: 10px;
+      width: max-content;
+      max-width: 90%;
     }
-
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-
-    /* Tooltip */
-    .tooltip {
-      position: relative;
-      display: inline-block;
-    }
-
-    .tooltip .tooltiptext {
-      visibility: hidden;
-      width: 200px;
-      background-color: #333;
-      color: #fff;
-      text-align: center;
-      border-radius: 6px;
-      padding: 8px;
-      position: absolute;
-      z-index: 1;
-      bottom: 125%;
-      left: 50%;
-      transform: translateX(-50%);
-      opacity: 0;
-      transition: opacity var(--transition-medium);
-      font-size: 0.8rem;
-      font-weight: normal;
-    }
-
-    .tooltip:hover .tooltiptext {
-      visibility: visible;
-      opacity: 1;
-    }
+    .toast.active { transform: translateX(-50%) translateY(0); opacity: 1; }
+    .loader { border: 2px solid rgba(255,255,255,0.1); border-top: 2px solid white; border-radius: 50%; width: 16px; height: 16px; animation: spin 0.8s linear infinite; display: none; }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
-  <!-- Navbar -->
+
   <nav class="navbar">
-    <div class="navbar-container">
-      <div class="navbar-brand">
-        <a href="https://github.com/Dhaval915" target="_blank">
-          <svg class="github-logo" height="32" aria-hidden="true" viewBox="0 0 16 16" version="1.1" width="32" data-view-component="true">
-            <path fill="white" d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"></path>
-          </svg>
-          <span>Dhaval915</span>
-        </a>
-      </div>
-      <ul class="nav-links">
-        <button class="hide-toggle"></button>
-        <li class="nav-link"><a href="https://web-delta-mauve.vercel.app/#">Home</a></li>
-        <li class="nav-link"><a href="https://github.com/Dhaval915" target="_blank">GitHub</a></li>
-        <li class="nav-link"><a href="https://web-delta-mauve.vercel.app/#projects">Projects</a></li>
-        <li class="nav-link"><a href="https://web-delta-mauve.vercel.app/#contact">Contact</a></li>
-      </ul>
-      <button class="menu-toggle"><i class="fas fa-bars"></i></button>
+    <div class="brand">
+      <i class="fas fa-wifi"></i> Connect
     </div>
+    <a href="https://github.com/Dhaval915" target="_blank" class="github-link">
+      <i class="fab fa-github"></i>
+    </a>
   </nav>
-  
-  <div class="menu-backdrop"></div>
 
-  <main>
-    <div class="card animate__animated animate__fadeIn">
-      <h1>📶 WiFi Card Generator</h1>
-
-      <label for="ssid">WiFi Name (SSID)</label>
-      <input type="text" id="ssid" placeholder="Enter WiFi name..." />
-
-      <label for="network-icon">Network Icon</label>
-      <select id="network-icon">
-        <option value="📶">Default (📶)</option>
-        <option value="🏠">Home (🏠)</option>
-        <option value="🏢">Office (🏢)</option>
-        <option value="☕">Cafe (☕)</option>
-        <option value="✈️">Travel (✈️)</option>
-      </select>
-
-      <label for="password">Password</label>
-      <input type="text" id="password" placeholder="Enter password..." />
+  <div class="container">
+    
+    <div class="controls-panel">
+      <h2><i class="fas fa-sliders-h"></i> Configuration</h2>
       
-      <div class="password-strength">
-        <div class="strength-meter"></div>
-        <div class="strength-text">Password Strength: <span id="strength-level">None</span></div>
+      <div class="form-group">
+        <label>Network Name (SSID)</label>
+        <input type="text" id="ssid" placeholder="Ex: My_Home_WiFi" oninput="updateLivePreview()">
       </div>
 
-      <label for="encryption">Security Type</label>
-      <select id="encryption">
-        <option value="WPA">WPA/WPA2</option>
-        <option value="WEP">WEP</option>
-        <option value="nopass">None</option>
-      </select>
-
-      <div class="advanced-toggle" onclick="toggleAdvanced()">
-        <span>⚙️ Advanced Options</span>
-      </div>
-
-      <div class="advanced-options" style="display: none;">
-        <label for="card-color">Card Color</label>
-        <input type="color" id="card-color" value="#ffffff">
-
-        <label for="text-color">Text Color</label>
-        <input type="color" id="text-color" value="#000000">
-
-        <label>
-          <input type="checkbox" id="hide-password"> Hide password in QR code
+      <div class="form-group">
+        <label>Password</label>
+        <input type="text" id="password" placeholder="Ex: secret123" oninput="updateLivePreview(); checkStrength()">
+        <div class="strength-bar"><div class="strength-fill" id="strength-fill"></div></div>
+        
+        <label class="checkbox-wrapper">
+          <input type="checkbox" id="hide-pass-toggle" onchange="updateLivePreview()">
+          <span>Hide Password on Card (Privacy)</span>
         </label>
       </div>
 
-      <button onclick="generateQR()">
-        <span id="generate-text">Generate WiFi Card</span>
-        <div class="loader" id="generate-loader"></div>
+      <div class="form-group">
+        <label>Security Type</label>
+        <select id="encryption">
+          <option value="WPA">WPA/WPA2 (Most Common)</option>
+          <option value="WEP">WEP</option>
+          <option value="nopass">Open (No Password)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Card Icon</label>
+        <select id="icon-select" onchange="updateLivePreview()">
+          <option value="fas fa-wifi">📶 WiFi Signal</option>
+          <option value="fas fa-home">🏠 Home</option>
+          <option value="fas fa-building">🏢 Office</option>
+          <option value="fas fa-coffee">☕ Cafe</option>
+          <option value="fas fa-gamepad">🎮 Gaming</option>
+          <option value="fas fa-rocket">🚀 Fast</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+         <label>Theme Color</label>
+         <div style="display: flex; gap: 10px;">
+           <input type="color" id="color-picker" value="#3b82f6" oninput="updateTheme(this.value)" style="height: 45px; width: 80px; cursor: pointer; padding: 2px; border-radius: 8px;">
+           <div style="flex-grow:1; display: flex; align-items: center; font-size: 0.8rem; color: var(--text-muted); line-height: 1.4;">
+             Tap color to customize look.
+           </div>
+         </div>
+      </div>
+
+      <button class="btn btn-primary" onclick="generateQR()">
+        <span id="gen-text">Update QR Code</span>
+        <div class="loader" id="gen-loader"></div>
       </button>
 
-      <div class="output" id="output" style="display: none;">
-        <div class="wifi-name" id="displaySSID"></div>
-        <div id="qrcode-container">
-          <canvas id="qrcode"></canvas>
-        </div>
-        <button id="downloadBtn" onclick="downloadCard()">
-          <span id="download-text">Download WiFi Card</span>
-          <div class="loader" id="download-loader"></div>
+      <div class="btn-group">
+        <button class="btn btn-outline" onclick="downloadCard()">
+          <i class="fas fa-download"></i> Download
         </button>
-        <button id="resetBtn" onclick="resetForm()">Generate Another</button>
-        <div class="social-share">
-          <button onclick="shareOnTwitter()" class="twitter">Share on Twitter</button>
-          <button onclick="shareOnWhatsApp()" class="whatsapp">Share on WhatsApp</button>
-          <button onclick="copyLink()" class="copy">Copy Link</button>
-        </div>
+        <button class="btn btn-outline" onclick="shareCard()">
+          <i class="fas fa-share-alt"></i> Share
+        </button>
       </div>
     </div>
-  </main>
 
-  <div class="toast" id="toast"></div>
+    <div class="preview-panel">
+      <div id="wifi-card">
+        <div class="card-header-bg" id="card-header"></div>
+        
+        <div class="card-content">
+          <div class="network-icon-display">
+            <i class="fas fa-wifi" id="card-icon"></i>
+          </div>
+          
+          <div class="ssid-display" id="card-ssid">Your Network</div>
+          <div class="pass-display" id="card-pass">••••••••</div>
+
+          <div class="qr-frame">
+            <canvas id="qrcode"></canvas>
+          </div>
+          
+          <div class="scan-me-text">Scan to Connect</div>
+        </div>
+      </div>
+      
+      <div style="margin-top: 1.5rem; color: var(--text-muted); font-size: 0.85rem; text-align: center;">
+        <i class="fas fa-info-circle"></i> Preview is live.
+      </div>
+    </div>
+
+  </div>
+
+  <div class="toast" id="toast">
+    <i class="fas fa-check-circle" style="color: var(--success)"></i>
+    <span id="toast-msg">Operation successful</span>
+  </div>
 
   <script>
-    // Navbar scroll effect
-    window.addEventListener('scroll', function() {
-      const navbar = document.querySelector('.navbar');
-      if (window.scrollY > 10) {
-        navbar.classList.add('scrolled');
+    /* --- State Management --- */
+    const els = {
+      ssid: document.getElementById('ssid'),
+      password: document.getElementById('password'),
+      encryption: document.getElementById('encryption'),
+      icon: document.getElementById('icon-select'),
+      hidePass: document.getElementById('hide-pass-toggle'),
+      cardSSID: document.getElementById('card-ssid'),
+      cardPass: document.getElementById('card-pass'),
+      cardIcon: document.getElementById('card-icon'),
+      cardHeader: document.getElementById('card-header'),
+      qrCanvas: document.getElementById('qrcode'),
+      toast: document.getElementById('toast'),
+      strengthFill: document.getElementById('strength-fill')
+    };
+
+    /* --- Initialization --- */
+    window.onload = () => {
+      generateQR(true); 
+    };
+
+    /* --- Live Preview Logic --- */
+    function updateLivePreview() {
+      // SSID
+      els.cardSSID.textContent = els.ssid.value.trim() || "Your Network";
+      
+      // Password logic
+      const pass = els.password.value;
+      
+      if (els.hidePass.checked && pass.length > 0) {
+        els.cardPass.textContent = "••••••••";
       } else {
-        navbar.classList.remove('scrolled');
+        els.cardPass.textContent = pass ? pass : "No Password";
       }
-    });
-
-    // Navbar toggle for mobile - FIXED VERSION
-    const menuToggle = document.querySelector('.menu-toggle');
-    const navLinks = document.querySelector('.nav-links');
-    const hideToggle = document.querySelector('.hide-toggle');
-    const backdrop = document.querySelector('.menu-backdrop');
-
-    function toggleMenu() {
-      const isMenuOpen = navLinks.classList.contains('show');
       
-      if (isMenuOpen) {
-        navLinks.classList.remove('show');
-        backdrop.classList.remove('show');
-        document.body.classList.remove('menu-open');
-      } else {
-        navLinks.classList.add('show');
-        backdrop.classList.add('show');
-        document.body.classList.add('menu-open');
-      }
+      // Icon
+      els.cardIcon.className = els.icon.value;
     }
 
-    menuToggle.addEventListener('click', toggleMenu);
-    hideToggle.addEventListener('click', toggleMenu);
-    backdrop.addEventListener('click', toggleMenu);
-
-    document.querySelectorAll('.nav-link').forEach(link => {
-      link.addEventListener('click', () => {
-        navLinks.classList.remove('show');
-        backdrop.classList.remove('show');
-        document.body.classList.remove('menu-open');
-      });
-    });
-
-    // Password strength meter
-    document.getElementById("password").addEventListener("input", function() {
-      const password = this.value;
-      const meter = document.querySelector(".strength-meter");
-      const text = document.getElementById("strength-level");
-      
-      let strength = 0;
-      if (password.length > 0) strength++;
-      if (password.length >= 8) strength++;
-      if (/[A-Z]/.test(password)) strength++;
-      if (/[0-9]/.test(password)) strength++;
-      if (/[^A-Za-z0-9]/.test(password)) strength++;
-      
-      const colors = ["#ff4757", "#ff6b81", "#ffa502", "#2ed573", "#1dd1a1"];
-      const labels = ["Very Weak", "Weak", "Medium", "Strong", "Very Strong"];
-      
-      meter.style.width = `${strength * 20}%`;
-      meter.style.background = colors[strength - 1] || "#eee";
-      text.textContent = labels[strength - 1] || "None";
-      text.style.color = colors[strength - 1] || "#333";
-    });
-
-    // Advanced options toggle
-    function toggleAdvanced() {
-      const adv = document.querySelector('.advanced-options');
-      adv.style.display = adv.style.display === 'none' ? 'block' : 'none';
+    function updateTheme(color) {
+      document.documentElement.style.setProperty('--primary', color);
+      document.documentElement.style.setProperty('--primary-hover', adjustColor(color, -20));
+      els.cardHeader.style.background = `linear-gradient(135deg, ${color}, ${adjustColor(color, 40)})`;
+      document.querySelector('.brand').style.background = `linear-gradient(135deg, ${color}, ${adjustColor(color, 40)})`;
+      document.querySelector('.brand').style.webkitBackgroundClip = 'text';
     }
 
-    // Show toast notification
-    function showToast(message) {
-      const toast = document.getElementById('toast');
-      toast.textContent = message;
-      toast.classList.add('show');
-      setTimeout(() => {
-        toast.classList.remove('show');
-      }, 3000);
-    }
-
-    // Generate QR code
-    function generateQR() {
-      const ssid = document.getElementById("ssid").value.trim();
-      const password = document.getElementById("password").value;
-      const encryption = document.getElementById("encryption").value;
-      const icon = document.getElementById("network-icon").value;
-      const hidePassword = document.getElementById("hide-password").checked;
+    /* --- QR Generation --- */
+    function generateQR(isInit = false) {
+      const ssid = els.ssid.value.trim();
+      const password = els.password.value;
+      const encryption = els.encryption.value;
       
-      if (!ssid) {
-        showToast("Please enter a WiFi name (SSID)");
+      if (!isInit && !ssid) {
+        showToast("Please enter a Network Name", true);
+        els.ssid.focus();
         return;
       }
 
-      // Show loading state
-      const generateText = document.getElementById("generate-text");
-      const generateLoader = document.getElementById("generate-loader");
-      generateText.style.display = "none";
-      generateLoader.style.display = "block";
+      if(!isInit) {
+        document.getElementById('gen-text').style.display = 'none';
+        document.getElementById('gen-loader').style.display = 'block';
+      }
 
-      const displayPassword = hidePassword ? '*'.repeat(password.length) : password;
-      const qrText = `WIFI:T:${encryption};S:${ssid};P:${password};;`;
+      // Always use real password for QR data
+      const qrText = `WIFI:T:${encryption};S:${ssid || "EXAMPLE"};P:${password};;`;
+      
+      setTimeout(() => {
+        QRCode.toCanvas(els.qrCanvas, qrText, {
+          width: 170,
+          margin: 1,
+          color: { dark: "#1e293b", light: "#ffffff" }
+        }, (error) => {
+          if(!isInit) {
+            document.getElementById('gen-text').style.display = 'inline';
+            document.getElementById('gen-loader').style.display = 'none';
+          }
+          if (error) console.error(error);
+          else if (!isInit) showToast("QR Code Updated");
+        });
+      }, isInit ? 0 : 300);
+    }
 
-      QRCode.toCanvas(document.getElementById("qrcode"), qrText, {
-        width: 200,
-        color: {
-          dark: "#0078d4",
-          light: "#ffffff00"
-        },
-        margin: 1
-      }, function(error) {
-        // Hide loading state
-        generateText.style.display = "inline";
-        generateLoader.style.display = "none";
+    /* --- Password Strength --- */
+    function checkStrength() {
+      const pass = els.password.value;
+      let strength = 0;
+      if (pass.length > 5) strength += 20;
+      if (pass.length > 8) strength += 20;
+      if (/[A-Z]/.test(pass)) strength += 20;
+      if (/[0-9]/.test(pass)) strength += 20;
+      if (/[^A-Za-z0-9]/.test(pass)) strength += 20;
 
-        if (error) {
-          console.error(error);
-          showToast("Error generating QR code");
-        } else {
-          document.getElementById("displaySSID").innerHTML = `WiFi: ${icon} ${ssid}<br>Password: ${displayPassword}`;
-          const output = document.getElementById("output");
-          output.style.display = 'block';
-          document.body.classList.add("show-output");
-          output.scrollIntoView({ behavior: "smooth" });
-          showToast("WiFi card generated successfully!");
+      els.strengthFill.style.width = strength + "%";
+      if(strength < 40) els.strengthFill.style.backgroundColor = "var(--danger)";
+      else if(strength < 80) els.strengthFill.style.backgroundColor = "#fbbf24";
+      else els.strengthFill.style.backgroundColor = "var(--success)";
+    }
+
+    /* --- Image Capture --- */
+    async function captureCard() {
+      const card = document.getElementById('wifi-card');
+      
+      return await html2canvas(card, {
+        scale: 3, 
+        backgroundColor: null,
+        logging: false,
+        useCORS: true,
+        allowTaint: true,
+        onclone: (clonedDoc) => {
+          const clonedCard = clonedDoc.getElementById('wifi-card');
+          clonedCard.style.transform = 'none';
+          clonedCard.style.boxShadow = 'none';
+          // Ensure correct sizing during capture
+          clonedCard.style.maxWidth = '400px'; 
         }
       });
     }
 
-    // Download card
+    /* --- Download --- */
     async function downloadCard() {
-      const output = document.getElementById("output");
-      const downloadBtn = document.getElementById("downloadBtn");
-      const resetBtn = document.getElementById("resetBtn");
-      const ssid = document.getElementById("ssid").value.trim().replace(/\s+/g, '_') || "WiFi_Card";
-      const cardColor = document.getElementById("card-color").value;
-      const textColor = document.getElementById("text-color").value;
-      
-      // Show loading state
-      const downloadText = document.getElementById("download-text");
-      const downloadLoader = document.getElementById("download-loader");
-      downloadText.style.display = "none";
-      downloadLoader.style.display = "block";
-
-      // Apply temporary styles
-      output.style.backgroundColor = cardColor;
-      const wifiName = output.querySelector(".wifi-name");
-      wifiName.style.color = textColor;
-      downloadBtn.style.display = "none";
-      resetBtn.style.display = "none";
-      document.querySelector('.social-share').style.display = "none";
+      const ssid = els.ssid.value.trim() || "WiFi";
+      showToast("Generating image...", false);
 
       try {
-        const canvas = await html2canvas(output, {
-          backgroundColor: cardColor,
-          useCORS: true,
-          scale: 2
-        });
-
-        // Restore elements
-        downloadText.style.display = "inline";
-        downloadLoader.style.display = "none";
-        downloadBtn.style.display = "block";
-        resetBtn.style.display = "block";
-        document.querySelector('.social-share').style.display = "flex";
-        output.style.backgroundColor = "";
-        wifiName.style.color = "";
-
-        const link = document.createElement("a");
-        link.href = canvas.toDataURL("image/png");
-        link.download = `WiFi_Card_${ssid}.png`;
+        const canvas = await captureCard();
+        const link = document.createElement('a');
+        link.download = `${ssid}_Connect.png`;
+        link.href = canvas.toDataURL('image/png');
         link.click();
         showToast("Download started!");
-      } catch (error) {
-        console.error("Download error:", error);
-        showToast("Error generating download");
-        // Ensure elements are restored even if error occurs
-        downloadText.style.display = "inline";
-        downloadLoader.style.display = "none";
-        downloadBtn.style.display = "block";
-        resetBtn.style.display = "block";
-        document.querySelector('.social-share').style.display = "flex";
-        output.style.backgroundColor = "";
-        wifiName.style.color = "";
+      } catch (err) {
+        console.error(err);
+        showToast("Error generating image", true);
       }
     }
 
-    // Social sharing
-    let generatedImageUrl = null;
-
-    async function shareOnTwitter() {
+    /* --- Share --- */
+    async function shareCard() {
+      showToast("Preparing to share...", false);
       try {
-        const ssid = document.getElementById("ssid").value.trim();
-        const text = `Check out this WiFi QR code I generated for ${ssid} using @Dhaval915's awesome tool! ${window.location.href}`;
+        const canvas = await captureCard();
         
-        window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, '_blank');
-        showToast("Opening Twitter...");
-      } catch (error) {
-        console.error("Error sharing to Twitter:", error);
-        showToast("Error sharing to Twitter");
-      }
-    }
+        canvas.toBlob(async (blob) => {
+          if (navigator.share && navigator.canShare) {
+            const file = new File([blob], "wifi-card.png", { type: "image/png" });
+            const shareData = {
+              files: [file],
+              title: 'Connect to WiFi',
+              text: `Connect to ${els.ssid.value || 'WiFi'} using this QR code.`
+            };
 
-    async function shareOnWhatsApp() {
-      try {
-        const ssid = document.getElementById("ssid").value.trim();
-        const text = `Check out this WiFi QR code I generated for ${ssid}! ${window.location.href}`;
-        
-        window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
-        showToast("Opening WhatsApp...");
-      } catch (error) {
-        console.error("Error sharing to WhatsApp:", error);
-        showToast("Error sharing to WhatsApp");
-      }
-    }
-
-    function copyLink() {
-      navigator.clipboard.writeText(window.location.href)
-        .then(() => {
-          showToast("Link copied to clipboard!");
-        })
-        .catch(err => {
-          console.error("Could not copy text: ", err);
-          showToast("Failed to copy link");
+            if (navigator.canShare(shareData)) {
+              await navigator.share(shareData);
+              showToast("Shared successfully!");
+            } else {
+              throw new Error("Sharing not supported");
+            }
+          } else {
+            const item = new ClipboardItem({ "image/png": blob });
+            await navigator.clipboard.write([item]);
+            showToast("Image copied to clipboard!");
+          }
         });
+      } catch (err) {
+        console.error(err);
+        showToast("Sharing failed / Copied instead", true);
+      }
     }
 
-    // Reset form
-    function resetForm() {
-      document.getElementById("ssid").value = "";
-      document.getElementById("password").value = "";
-      document.getElementById("encryption").value = "WPA";
-      document.getElementById("network-icon").value = "📶";
-      document.getElementById("card-color").value = "#ffffff";
-      document.getElementById("text-color").value = "#000000";
-      document.getElementById("hide-password").checked = false;
-      document.querySelector(".advanced-options").style.display = "none";
-      
-      document.getElementById("output").style.display = "none";
-      const ctx = document.getElementById("qrcode").getContext('2d');
-      ctx.clearRect(0, 0, 300, 300);
-      document.body.classList.remove("show-output");
-      window.scrollTo({ top: 0, behavior: "smooth" });
-      
-      // Reset password strength
-      document.querySelector(".strength-meter").style.width = "0";
-      document.getElementById("strength-level").textContent = "None";
-      document.getElementById("strength-level").style.color = "#333";
-      
-      // Reset generated image URL
-      generatedImageUrl = null;
-      
-      showToast("Form reset successfully!");
+    /* --- Helpers --- */
+    function showToast(msg, isError = false) {
+      const toast = els.toast;
+      const icon = toast.querySelector('i');
+      document.getElementById('toast-msg').textContent = msg;
+      icon.className = isError ? "fas fa-exclamation-circle" : "fas fa-check-circle";
+      icon.style.color = isError ? "var(--danger)" : "var(--success)";
+      toast.classList.add('active');
+      setTimeout(() => toast.classList.remove('active'), 3000);
     }
 
-    // Initialize the app
-    document.addEventListener('DOMContentLoaded', function() {
-      // Add any initialization code here if needed
-    });
+    function adjustColor(color, amount) {
+        return '#' + color.replace(/^#/, '').replace(/../g, color => ('0'+Math.min(255, Math.max(0, parseInt(color, 16) + amount)).toString(16)).substr(-2));
+    }
   </script>
 </body>
 </html>
