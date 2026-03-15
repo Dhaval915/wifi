@@ -3,12 +3,20 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="description" content="Create professional WiFi QR codes in seconds. Generate shareable, downloadable WiFi cards with custom themes and easy setup.">
+  <meta property="og:title" content="Connect - WiFi QR Code Generator">
+  <meta property="og:description" content="Create professional WiFi QR codes in seconds. Share your WiFi instantly.">
+  <meta property="og:image" content="https://via.placeholder.com/1200x630?text=WiFi+Card+Generator">
+  <meta property="og:type" content="website">
+  <meta name="theme-color" content="#0f172a">
   <title>Connect | Professional WiFi Card Generator</title>
-  
+  <link rel="icon" type="image/x-icon" href="logo.ico">
+  <link rel="apple-touch-icon" href="logo.png">
+
   <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
   <style>
     :root {
@@ -22,12 +30,27 @@
       --text-muted: #94a3b8;
       --success: #10b981;
       --danger: #ef4444;
+      --warning: #f59e0b;
       --radius: 16px;
       --shadow: 0 10px 40px -10px rgba(0,0,0,0.5);
+      --transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    /* Base Reset */
-    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
+    :root.light-mode {
+      --bg-color: #ffffff;
+      --card-bg: rgba(255, 255, 255, 0.95);
+      --glass-border: rgba(0, 0, 0, 0.08);
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+    }
+
+    * { 
+      box-sizing: border-box; 
+      margin: 0; 
+      padding: 0; 
+      -webkit-font-smoothing: antialiased;
+      -webkit-tap-highlight-color: transparent;
+    }
     
     html { scroll-behavior: smooth; }
 
@@ -44,16 +67,21 @@
       overflow-x: hidden;
       display: flex;
       flex-direction: column;
+      position: relative;
+      transition: background-color 0.3s ease;
     }
 
-    /* Navbar */
+    :root.light-mode body {
+      background: #f5f7fa;
+      background-image: none;
+    }
+
     .navbar {
       display: flex;
       justify-content: space-between;
       align-items: center;
       padding: 1.25rem 2rem;
       width: 100%;
-      max-width: 1400px;
       margin: 0 auto;
       backdrop-filter: blur(10px);
       position: sticky;
@@ -61,28 +89,246 @@
       z-index: 100;
       background: rgba(15, 23, 42, 0.6);
       border-bottom: 1px solid rgba(255,255,255,0.05);
+      animation: slideDown 0.6s ease-out;
+      transition: var(--transition);
     }
 
-    .brand {
-      font-size: 1.4rem;
+    :root.light-mode .navbar {
+      background: rgba(255, 255, 255, 0.8);
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .navbar-brand {
+      font-size: 1.3rem;
       font-weight: 700;
       background: linear-gradient(135deg, var(--primary), var(--accent));
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       display: flex;
       align-items: center;
-      gap: 10px;
+      justify-content: center;
+      gap: 0.65rem;
+      cursor: pointer;
+      transition: var(--transition);
+      padding: 0.5rem 0.75rem;
+      border-radius: 8px;
+    }
+
+    .navbar-brand i {
+      font-size: 1.5rem;
+      display: flex;
+      align-items: center;
+    }
+
+    .navbar-brand span {
+      letter-spacing: 0.3px;
+    }
+
+    .navbar-brand:hover {
+      transform: scale(1.08);
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .navbar-brand:active {
+      transform: scale(0.98);
+    }
+
+    .nav-actions {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+    }
+
+    .theme-toggle {
+      width: 44px;
+      height: 44px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--glass-border);
+      border-radius: 10px;
+      color: var(--text-main);
+      cursor: pointer;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
+    }
+
+    .theme-toggle:hover {
+      background: rgba(255,255,255,0.1);
+      color: var(--primary);
+      transform: scale(1.05);
     }
 
     .github-link {
       color: var(--text-main);
       font-size: 1.4rem;
-      transition: transform 0.3s ease;
+      transition: var(--transition);
       padding: 5px;
+      align-items: center;
+      justify-content: center;
     }
-    .github-link:hover { transform: rotate(15deg) scale(1.1); color: var(--primary); }
 
-    /* Layout */
+    .github-link:hover { 
+      transform: rotate(15deg) scale(1.1); 
+      color: var(--primary); 
+    }
+
+    /* Hamburger Menu */
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      cursor: pointer;
+      gap: 5px;
+      background: none;
+      border: none;
+      padding: 5px;
+      width: 44px;
+      height: 44px;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
+    }
+
+    .hamburger span {
+      width: 24px;
+      height: 2.5px;
+      background: var(--text-main);
+      border-radius: 3px;
+      transition: var(--transition);
+    }
+
+    .hamburger:hover {
+      background: rgba(255,255,255,0.05);
+      border-radius: 8px;
+    }
+
+    .hamburger.active span:nth-child(1) {
+      transform: rotate(45deg) translate(8px, 8px);
+    }
+
+    .hamburger.active span:nth-child(2) {
+      opacity: 0;
+    }
+
+    .hamburger.active span:nth-child(3) {
+      transform: rotate(-45deg) translate(7px, -7px);
+    }
+
+    /* Mobile Navigation Menu */
+    .mobile-menu {
+      display: none;
+      position: absolute;
+      top: 65px;
+      left: 0;
+      right: 0;
+      background: rgba(15, 23, 42, 0.98);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      padding: 1rem;
+      flex-direction: column;
+      gap: 0.5rem;
+      z-index: 99;
+      animation: slideDown 0.3s ease-out;
+    }
+
+    :root.light-mode .mobile-menu {
+      background: rgba(255, 255, 255, 0.98);
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .mobile-menu.active {
+      display: flex;
+    }
+
+    .mobile-menu-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.05);
+      transition: var(--transition);
+      color: var(--text-main);
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+      font-size: 0.95rem;
+      font-weight: 500;
+    }
+
+    .mobile-menu-item:hover {
+      background: rgba(59, 130, 246, 0.1);
+      border-left: 3px solid var(--primary);
+    }
+
+    .mobile-menu-item i {
+      font-size: 1.1rem;
+      color: var(--primary);
+      min-width: 20px;
+    }
+
+    .tabs-container {
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 1rem;
+      border-bottom: 1px solid var(--glass-border);
+      margin-bottom: 2rem;
+      padding-bottom: 0;
+      --webkit-overflow-scrolling: touch;
+    }
+
+    .tab {
+      padding: 1rem 1.5rem;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      position: relative;
+      transition: color 0.3s ease;
+      white-space: nowrap;
+    }
+
+    .tab:hover {
+      color: var(--text-main);
+    }
+
+    .tab.active {
+      color: var(--primary);
+    }
+
+    .tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      border-radius: 3px;
+      animation: slideInWidth 0.3s ease;
+    }
+
+    .tab-content {
+      display: none;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .tab-content.active {
+      display: block;
+      margin-bottom: 25px;
+    }
+
     .container {
       width: 100%;
       max-width: 1200px;
@@ -95,7 +341,6 @@
       flex: 1;
     }
 
-    /* Controls Panel */
     .controls-panel {
       background: var(--card-bg);
       backdrop-filter: blur(12px);
@@ -104,31 +349,57 @@
       border-radius: var(--radius);
       box-shadow: var(--shadow);
       animation: slideInLeft 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: var(--transition);
     }
 
-    h2 { font-size: 1.2rem; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 10px; }
+    h2 { 
+      font-size: 1.2rem; 
+      margin-bottom: 1.25rem; 
+      display: flex; 
+      align-items: center; 
+      gap: 10px; 
+      color: var(--text-main);
+    }
+
     h2 i { color: var(--primary); }
 
-    .form-group { margin-bottom: 1.25rem; }
+    .form-group { 
+      margin-bottom: 1.25rem; 
+      animation: fadeInUp 0.6s ease;
+    }
     
     label {
       display: block;
       font-size: 0.85rem;
-      font-weight: 500;
+      font-weight: 600;
       color: var(--text-muted);
       margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
 
-    input[type="text"], select {
+    input[type="text"], input[type="password"], select {
       width: 100%;
       background: rgba(0, 0, 0, 0.2);
-      border: 1px solid var(--glass-border);
+      border: 1.5px solid var(--glass-border);
       color: var(--text-main);
       padding: 0.9rem 1rem;
       border-radius: 10px;
       font-size: 1rem;
-      transition: all 0.2s ease;
+      transition: var(--transition);
       font-family: inherit;
+    }
+
+    :root.light-mode input[type="text"],
+    :root.light-mode input[type="password"],
+    :root.light-mode select {
+      background: rgba(0, 0, 0, 0.05);
+      color: #1e293b;
+      border-color: rgba(0,0,0,0.1);
+    }
+
+    input[type="text"]::placeholder, input[type="password"]::placeholder {
+      color: rgba(148, 163, 184, 0.6);
     }
 
     input:focus, select:focus {
@@ -136,17 +407,48 @@
       border-color: var(--primary);
       box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
       background: rgba(0, 0, 0, 0.3);
+      transform: translateY(-2px);
     }
 
-    /* Checkbox Style */
+    :root.light-mode input:focus,
+    :root.light-mode select:focus {
+      background: rgba(0, 0, 0, 0.08);
+    }
+
+    .info-box {
+      background: rgba(59, 130, 246, 0.1);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      padding: 1rem;
+      border-radius: 10px;
+      margin-bottom: 1.25rem;
+      font-size: 0.85rem;
+      color: rgba(59, 130, 246, 0.9);
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      animation: fadeIn 0.5s ease;
+    }
+
+    .info-box i {
+      flex-shrink: 0;
+      margin-top: 3px;
+    }
+
     .checkbox-wrapper {
       display: flex;
       align-items: center;
       gap: 12px;
       cursor: pointer;
       margin-top: 10px;
-      padding: 5px 0;
+      padding: 8px 10px;
+      border-radius: 8px;
+      transition: var(--transition);
     }
+
+    .checkbox-wrapper:hover {
+      background: rgba(255, 255, 255, 0.03);
+    }
+
     .checkbox-wrapper input {
       accent-color: var(--primary);
       width: 18px;
@@ -154,22 +456,29 @@
       cursor: pointer;
     }
 
-    /* Password Strength */
     .strength-bar {
-      height: 4px;
+      height: 6px;
       background: rgba(255,255,255,0.1);
       margin-top: 8px;
-      border-radius: 2px;
+      border-radius: 3px;
       overflow: hidden;
       display: flex;
     }
+
     .strength-fill {
       height: 100%;
       width: 0;
       transition: width 0.3s ease, background-color 0.3s ease;
+      border-radius: 3px;
     }
 
-    /* Buttons */
+    .strength-text {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 5px;
+      font-weight: 600;
+    }
+
     .btn {
       width: 100%;
       padding: 1rem;
@@ -182,8 +491,29 @@
       align-items: center;
       justify-content: center;
       gap: 8px;
-      transition: transform 0.1s, box-shadow 0.2s;
+      transition: var(--transition);
       touch-action: manipulation;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.3);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+      pointer-events: none;
+    }
+
+    .btn:active::before {
+      width: 300px;
+      height: 300px;
     }
 
     .btn-primary {
@@ -191,19 +521,122 @@
       color: white;
       box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
     }
-    .btn-primary:active { transform: scale(0.98); }
 
-    .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem; }
+    .btn-primary:hover {
+      box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .btn-primary:active { 
+      transform: scale(0.98); 
+    }
+
+    .btn-group { 
+      display: grid; 
+      grid-template-columns: 1fr 1fr; 
+      gap: 1rem; 
+      margin-top: 1rem; 
+    }
     
     .btn-outline {
       background: transparent;
       border: 1px solid var(--glass-border);
       color: var(--text-muted);
+      transition: all 0.3s ease;
     }
-    .btn-outline:hover { background: rgba(255,255,255,0.05); color: var(--text-main); }
-    .btn-outline:active { transform: scale(0.98); }
 
-    /* Preview Section */
+    .btn-outline:hover { 
+      background: rgba(255,255,255,0.05); 
+      color: var(--text-main);
+      border-color: var(--primary);
+      transform: translateY(-2px);
+    }
+
+    .btn-outline:active { 
+      transform: scale(0.98); 
+    }
+
+    #save-favorite-btn {
+      transition: all 0.3s ease;
+    }
+
+    #save-favorite-btn:hover {
+      transform: translateY(-2px) scale(1.05) !important;
+    }
+
+    .btn-small {
+      padding: 0.6rem 1rem;
+      font-size: 0.85rem;
+      width: auto;
+    }
+
+    .favorites-section {
+      margin-top: 2rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--glass-border);
+    }
+
+    .favorite-item {
+      background: rgba(0,0,0,0.2);
+      padding: 1rem;
+      border-radius: 10px;
+      margin-bottom: 0.75rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      transition: var(--transition);
+      border: 1px solid transparent;
+    }
+
+    .favorite-item:hover {
+      background: rgba(0,0,0,0.3);
+      border-color: var(--primary);
+      transform: translateX(4px);
+    }
+
+    .favorite-info {
+      flex: 1;
+    }
+
+    .favorite-name {
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 3px;
+    }
+
+    .favorite-ssid {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-family: monospace;
+    }
+
+    .favorite-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .favorite-actions button {
+      background: rgba(255,255,255,0.1);
+      border: none;
+      color: var(--text-main);
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
+      font-size: 0.9rem;
+    }
+
+    .favorite-actions button:hover {
+      background: var(--primary);
+      color: white;
+      transform: scale(1.1);
+    }
+
     .preview-panel {
       position: sticky;
       top: 6rem;
@@ -214,11 +647,20 @@
       animation: slideInRight 0.5s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    /* --- WIFI CARD REDESIGN --- */
+    .preview-info {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      align-items: center;
+    }
+
     #wifi-card {
       width: 100%;
       max-width: 380px;
-      /* Dynamic Aspect Ratio for better mobile fit */
       min-height: 520px;
       background: #ffffff;
       border-radius: 24px;
@@ -231,7 +673,13 @@
       align-items: center;
       text-align: center;
       padding: 0;
-      transition: transform 0.3s ease;
+      transition: var(--transition);
+      transform-style: preserve-3d;
+    }
+
+    #wifi-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 25px 60px -5px rgba(0,0,0,0.6);
     }
 
     .card-header-bg {
@@ -241,8 +689,15 @@
       border-bottom-left-radius: 50% 30px;
       border-bottom-right-radius: 50% 30px;
       position: absolute;
-      top: 0; left: 0;
+      top: 0;
+      left: 0;
       z-index: 1;
+      animation: gradientShift 3s ease-in-out infinite;
+    }
+
+    @keyframes gradientShift {
+      0%, 100% { filter: brightness(1); }
+      50% { filter: brightness(1.1); }
     }
 
     .card-content {
@@ -269,6 +724,12 @@
       margin-top: 25px;
       margin-bottom: 1.25rem;
       color: #0f172a;
+      animation: bounce 2s infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
     }
 
     .ssid-display { 
@@ -287,12 +748,19 @@
       color: #64748b; 
       font-family: 'Courier New', monospace; 
       background: #f1f5f9; 
-      padding: 6px 14px; 
+      padding: 8px 16px; 
       border-radius: 12px; 
       display: inline-block;
       font-weight: 600;
       letter-spacing: 0.5px;
-      margin-bottom: auto; /* Pushes QR code to bottom */
+      margin-bottom: auto;
+      transition: var(--transition);
+      cursor: pointer;
+    }
+
+    .pass-display:hover {
+      background: #e2e8f0;
+      transform: scale(1.05);
     }
 
     .qr-frame {
@@ -304,6 +772,12 @@
       display: flex;
       justify-content: center;
       align-items: center;
+      animation: scaleIn 0.5s ease;
+    }
+
+    @keyframes scaleIn {
+      from { transform: scale(0.95); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
     }
 
     .scan-me-text {
@@ -315,9 +789,109 @@
       font-weight: 700;
     }
 
-    /* --- RESPONSIVE BREAKPOINTS --- */
-    
-    /* Tablet (Max Width 1024px) */
+    .settings-panel {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    .settings-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .setting-item {
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border);
+      padding: 1.5rem;
+      border-radius: var(--radius);
+      animation: slideInUp 0.5s ease;
+    }
+
+    .setting-item h3 {
+      font-size: 1rem;
+      margin-bottom: 1rem;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .setting-item h3 i {
+      color: var(--primary);
+    }
+
+    .about-section {
+      /* max-width: 800px; */
+      margin: 20px;
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border);
+      padding: 2rem;
+      border-radius: var(--radius);
+      animation: fadeIn 0.6s ease;
+    }
+
+    .about-section h3 {
+      font-size: 1.3rem;
+      margin-bottom: 1rem;
+      color: var(--text-main);
+    }
+
+    .about-section p {
+      color: var(--text-muted);
+      line-height: 1.8;
+      margin-bottom: 1rem;
+    }
+
+    .about-section ul {
+      margin-left: 2rem;
+      color: var(--text-muted);
+      line-height: 2;
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+
+    .feature-card {
+      padding: 1.5rem;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      text-align: center;
+      transition: var(--transition);
+    }
+
+    .feature-card:hover {
+      background: rgba(255,255,255,0.1);
+      transform: translateY(-4px);
+      border-color: var(--primary);
+    }
+
+    .feature-card i {
+      font-size: 2rem;
+      color: var(--primary);
+      margin-bottom: 0.75rem;
+    }
+
+    .feature-card h4 {
+      color: var(--text-main);
+      font-size: 0.95rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .feature-card p {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+
     @media (max-width: 1024px) {
       .container {
         gap: 2rem;
@@ -325,44 +899,68 @@
       #wifi-card {
         max-width: 340px;
       }
+      .settings-grid {
+        grid-template-columns: 1fr;
+      }
     }
 
-    /* Mobile (Max Width 900px) - Switches to Single Column */
     @media (max-width: 900px) {
       .navbar {
         padding: 1rem 1.5rem;
       }
-      
-      .container {
-        grid-template-columns: 1fr; /* Stack vertically */
-        padding: 1.5rem;
-        gap: 3rem;
+
+      .hamburger {
+        display: flex;
       }
 
-      /* Control panel usually comes first in DOM, so it stays on top */
+      .nav-actions {
+        display: none;
+      }
+      
+      .tabs-container {
+        display: none;
+      }
+      
+      .container {
+        grid-template-columns: 1fr;
+        padding: 1.5rem;
+        gap: 2rem;
+      }
+
       .controls-panel {
-        order: 1; /* Explicitly keep controls first for better typing flow */
+        order: 1;
       }
       
       .preview-panel {
-        order: 2; /* Preview below controls on mobile */
-        position: static; /* Remove sticky on mobile */
+        order: 2;
+        position: static;
         transform: none;
       }
 
       #wifi-card {
-        max-width: 100%; /* Use full width available */
-        width: 320px; /* Optimal width for phone screens */
+        max-width: 100%;
+        width: 320px;
         min-height: auto;
         aspect-ratio: 1/1.5;
       }
+
+      .tabs {
+        gap: 0.5rem;
+        padding: 0.5rem;
+        margin: 1.5rem -0.5rem 2rem -0.5rem;
+        overflow-x: auto;
+      }
+
+      .tab {
+        padding: 0.75rem 1rem;
+        font-size: 0.9rem;
+      }
     }
 
-    /* Small Mobile (Max Width 480px) */
     @media (max-width: 480px) {
       .container {
         padding: 1rem;
-        gap: 2rem;
+        gap: 1.5rem;
       }
       
       .controls-panel {
@@ -370,143 +968,467 @@
       }
 
       .btn-group {
-        grid-template-columns: 1fr; /* Stack buttons vertically */
+        grid-template-columns: 1fr;
       }
 
       #wifi-card {
-        width: 100%; 
+        width: 100%;
         border-radius: 20px;
       }
       
       .ssid-display {
         font-size: 1.3rem;
       }
+
+      .feature-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .tabs {
+        padding: 0;
+        margin: 1rem 0 1.5rem 0;
+      }
+
+      .tab {
+        padding: 0.75rem;
+        font-size: 0.85rem;
+      }
+      
+      .tabs-container {
+        display: none;
+      }
+
+      .navbar {
+        padding: 1rem;
+      }
+
+      .navbar-brand {
+        font-size: 1rem;
+        gap: 0.5rem;
+      }
+
+      .navbar-brand i {
+        font-size: 1.5rem;
+      }
+
+      .navbar-brand {
+        font-size: 1.1rem;
+        padding: 0.4rem 0.6rem;
+        gap: 0.5rem;
+      }
+
+      .navbar-brand i {
+        font-size: 1.3rem;
+      }
+
+      .navbar-brand span {
+        display: block;
+      }
+
+      .nav-actions {
+        gap: 10px;
+      }
+
+      .mobile-menu {
+        width: 100%;
+        left: 0 !important;
+        right: 0 !important;
+        max-height: calc(100vh - 65px);
+        overflow-y: auto;
+      }
+
+      .mobile-menu-item {
+        padding: 1rem 1.5rem;
+        font-size: 0.95rem;
+      }
+
+      .settings-panel {
+        padding: 0 1rem;
+      }
+
+      .settings-grid {
+        grid-template-columns: 1fr;
+      }
     }
 
-    /* Animations */
-    @keyframes slideInLeft { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes slideInRight { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes slideInLeft { 
+      from { opacity: 0; transform: translateX(-30px); } 
+      to { opacity: 1; transform: translateX(0); } 
+    }
+
+    @keyframes slideInRight { 
+      from { opacity: 0; transform: translateX(30px); } 
+      to { opacity: 1; transform: translateX(0); } 
+    }
+
+    @keyframes slideInDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideInWidth {
+      from { width: 0; }
+      to { width: 100%; }
+    }
     
-    /* Toast */
     .toast {
-      position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(100px);
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
       background: rgba(15, 23, 42, 0.95);
       border: 1px solid var(--glass-border);
-      color: white; padding: 12px 24px; border-radius: 50px;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 50px;
       box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-      opacity: 0; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      z-index: 2000; font-size: 0.9rem; display: flex; align-items: center; gap: 10px;
+      opacity: 0;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      z-index: 2000;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
       width: max-content;
       max-width: 90%;
     }
-    .toast.active { transform: translateX(-50%) translateY(0); opacity: 1; }
-    .loader { border: 2px solid rgba(255,255,255,0.1); border-top: 2px solid white; border-radius: 50%; width: 16px; height: 16px; animation: spin 0.8s linear infinite; display: none; }
-    @keyframes spin { 100% { transform: rotate(360deg); } }
+
+    .toast.active {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    .loader {
+      border: 2px solid rgba(255,255,255,0.1);
+      border-top: 2px solid white;
+      border-radius: 50%;
+      width: 16px;
+      height: 16px;
+      animation: spin 0.8s linear infinite;
+      display: none;
+    }
+
+    @keyframes spin {
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    .shortcut-hint {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 0.5rem;
+    }
+
+    .kbd {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid var(--glass-border);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 0.8rem;
+    }
   </style>
 </head>
 <body>
 
   <nav class="navbar">
-    <div class="brand">
-      <i class="fas fa-wifi"></i> Connect
+    <div class="navbar-brand" onclick="document.querySelector('button[data-tab=\"generator\"]').click()" title="Go to Generator">
+      <i class="fas fa-wifi"></i> 
+      <span>Connect</span>
     </div>
-    <a href="https://github.com/Dhaval915" target="_blank" class="github-link">
-      <i class="fab fa-github"></i>
-    </a>
+    <button class="hamburger" id="navbar-hamburger" onclick="toggleHamburgerMenu()" title="Toggle Menu" aria-label="Menu">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+    <div class="nav-actions">
+      <button class="theme-toggle" id="theme-toggle" title="Toggle Dark/Light Mode" onclick="toggleTheme()">
+        <i class="fas fa-sun"></i>
+      </button>
+      <a href="https://github.com/Dhaval915" target="_blank" class="github-link" title="View source on GitHub">
+        <i class="fab fa-github"></i>
+      </a>
+    </div>
   </nav>
 
-  <div class="container">
-    
-    <div class="controls-panel">
-      <h2><i class="fas fa-sliders-h"></i> Configuration</h2>
-      
-      <div class="form-group">
-        <label>Network Name (SSID)</label>
-        <input type="text" id="ssid" placeholder="Ex: My_Home_WiFi" oninput="updateLivePreview()">
-      </div>
+  <div class="mobile-menu" id="mobile-nav-menu">
+    <button class="mobile-menu-item" onclick="switchTab('generator'); closeMobileMenu();"><i class="fas fa-magic"></i> Generator</button>
+    <button class="mobile-menu-item" onclick="switchTab('favorites'); closeMobileMenu();"><i class="fas fa-heart"></i> Favorites</button>
+    <button class="mobile-menu-item" onclick="switchTab('settings'); closeMobileMenu();"><i class="fas fa-cog"></i> Settings</button>
+    <button class="mobile-menu-item" onclick="switchTab('about'); closeMobileMenu();"><i class="fas fa-question-circle"></i> About</button>
+    <div style="height: 1px; background: rgba(255,255,255,0.1); margin: 0.5rem 0;"></div>
+    <button class="mobile-menu-item" onclick="toggleTheme(); closeMobileMenu();"><i class="fas fa-sun"></i> Toggle Theme</button>
+    <a href="https://github.com/Dhaval915" target="_blank" class="mobile-menu-item" style="color: var(--text-main); text-decoration: none;"><i class="fab fa-github"></i> GitHub</a>
+  </div>
 
-      <div class="form-group">
-        <label>Password</label>
-        <input type="text" id="password" placeholder="Ex: secret123" oninput="updateLivePreview(); checkStrength()">
-        <div class="strength-bar"><div class="strength-fill" id="strength-fill"></div></div>
-        
-        <label class="checkbox-wrapper">
-          <input type="checkbox" id="hide-pass-toggle" onchange="updateLivePreview()">
-          <span>Hide Password on Card (Privacy)</span>
-        </label>
-      </div>
-
-      <div class="form-group">
-        <label>Security Type</label>
-        <select id="encryption">
-          <option value="WPA">WPA/WPA2 (Most Common)</option>
-          <option value="WEP">WEP</option>
-          <option value="nopass">Open (No Password)</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label>Card Icon</label>
-        <select id="icon-select" onchange="updateLivePreview()">
-          <option value="fas fa-wifi">📶 WiFi Signal</option>
-          <option value="fas fa-home">🏠 Home</option>
-          <option value="fas fa-building">🏢 Office</option>
-          <option value="fas fa-coffee">☕ Cafe</option>
-          <option value="fas fa-gamepad">🎮 Gaming</option>
-          <option value="fas fa-rocket">🚀 Fast</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-         <label>Theme Color</label>
-         <div style="display: flex; gap: 10px;">
-           <input type="color" id="color-picker" value="#3b82f6" oninput="updateTheme(this.value)" style="height: 45px; width: 80px; cursor: pointer; padding: 2px; border-radius: 8px;">
-           <div style="flex-grow:1; display: flex; align-items: center; font-size: 0.8rem; color: var(--text-muted); line-height: 1.4;">
-             Tap color to customize look.
-           </div>
-         </div>
-      </div>
-
-      <button class="btn btn-primary" onclick="generateQR()">
-        <span id="gen-text">Update QR Code</span>
-        <div class="loader" id="gen-loader"></div>
+  <div class="tabs-container">
+    <div class="tabs">
+      <button class="tab active" data-tab="generator" onclick="switchTab('generator')">
+        <i class="fas fa-magic"></i> Generator
       </button>
-
-      <div class="btn-group">
-        <button class="btn btn-outline" onclick="downloadCard()">
-          <i class="fas fa-download"></i> Download
-        </button>
-        <button class="btn btn-outline" onclick="shareCard()">
-          <i class="fas fa-share-alt"></i> Share
-        </button>
-      </div>
+      <button class="tab" data-tab="favorites" onclick="switchTab('favorites')">
+        <i class="fas fa-heart"></i> Favorites
+      </button>
+      <button class="tab" data-tab="settings" onclick="switchTab('settings')">
+        <i class="fas fa-cog"></i> Settings
+      </button>
+      <button class="tab" data-tab="about" onclick="switchTab('about')">
+        <i class="fas fa-question-circle"></i> About
+      </button>
     </div>
+  </div>
 
-    <div class="preview-panel">
-      <div id="wifi-card">
-        <div class="card-header-bg" id="card-header"></div>
+  <div id="generator" class="tab-content active">
+    <div class="container">
+    
+      <div class="controls-panel">
+        <h2><i class="fas fa-sliders-h"></i> WiFi Configuration</h2>
         
-        <div class="card-content">
-          <div class="network-icon-display">
-            <i class="fas fa-wifi" id="card-icon"></i>
-          </div>
-          
-          <div class="ssid-display" id="card-ssid">Your Network</div>
-          <div class="pass-display" id="card-pass">••••••••</div>
+        <div class="info-box">
+          <i class="fas fa-lightbulb"></i>
+          <span>Enter your WiFi details to generate a shareable QR code. Your data stays private and never leaves your device.</span>
+        </div>
+        
+        <div class="form-group">
+          <label>Network Name (SSID) <span style="color: var(--danger);">*</span></label>
+          <input type="text" id="ssid" placeholder="Ex: My_Home_WiFi" oninput="updateLivePreview()" maxlength="32" required>
+          <div class="shortcut-hint">Required field (Max 32 characters)</div>
+        </div>
 
-          <div class="qr-frame">
-            <canvas id="qrcode"></canvas>
-          </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="password" placeholder="Ex: secret123" oninput="updateLivePreview(); checkStrength()" maxlength="63">
+          <div class="strength-bar"><div class="strength-fill" id="strength-fill"></div></div>
+          <div class="strength-text" id="strength-text"></div>
           
-          <div class="scan-me-text">Scan to Connect</div>
+          <label class="checkbox-wrapper">
+            <input type="checkbox" id="show-pass-toggle" onchange="togglePasswordVisibility()">
+            <span>Show Password</span>
+          </label>
+
+          <label class="checkbox-wrapper">
+            <input type="checkbox" id="hide-pass-toggle" onchange="updateLivePreview()">
+            <span>Hide Password on Card (Privacy)</span>
+          </label>
+        </div>
+
+        <div class="form-group">
+          <label>Security Type</label>
+          <select id="encryption" onchange="updateLivePreview()">
+            <option value="WPA">WPA/WPA2 (Most Common)</option>
+            <option value="WEP">WEP</option>
+            <option value="nopass">Open (No Password)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Card Icon</label>
+          <select id="icon-select" onchange="updateLivePreview()">
+            <option value="fas fa-wifi">📶 WiFi Signal</option>
+            <option value="fas fa-home">🏠 Home</option>
+            <option value="fas fa-building">🏢 Office</option>
+            <option value="fas fa-coffee">☕ Cafe</option>
+            <option value="fas fa-gamepad">🎮 Gaming</option>
+            <option value="fas fa-rocket">🚀 Fast</option>
+            <option value="fas fa-shield">🛡️ Secure</option>
+            <option value="fas fa-globe">🌐 Public</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Theme Color</label>
+          <div style="display: flex; gap: 10px;">
+            <input type="color" id="color-picker" value="#3b82f6" oninput="updateTheme(this.value)" style="height: 45px; width: 80px; cursor: pointer; padding: 2px; border-radius: 8px; border: 1px solid var(--glass-border);">
+            <div style="flex-grow:1; display: flex; align-items: center; font-size: 0.8rem; color: var(--text-muted); line-height: 1.4;">
+              Click to customize card theme color
+            </div>
+          </div>
+        </div>
+
+        <button class="btn btn-primary" onclick="generateQR()">
+          <i class="fas fa-sync-alt" id="gen-icon"></i>
+          <span id="gen-text">Generate QR Code</span>
+          <div class="loader" id="gen-loader"></div>
+        </button>
+
+        <div class="btn-group">
+          <button class="btn btn-outline" onclick="downloadCard()" title="Download card as PNG">
+            <i class="fas fa-download"></i> Download
+          </button>
+          <button class="btn btn-outline" onclick="shareCard()" title="Share card">
+            <i class="fas fa-share-alt"></i> Share
+          </button>
+        </div>
+
+        <div class="btn-group">
+          <button class="btn btn-outline" onclick="copyWiFiString()" title="Copy WiFi connection string">
+            <i class="fas fa-copy"></i> Copy String
+          </button>
+          <button class="btn btn-outline" id="save-favorite-btn" onclick="saveFavorite()" title="Save to favorites">
+            <i class="fas fa-star"></i> Save
+          </button>
         </div>
       </div>
-      
-      <div style="margin-top: 1.5rem; color: var(--text-muted); font-size: 0.85rem; text-align: center;">
-        <i class="fas fa-info-circle"></i> Preview is live.
+
+      <div class="preview-panel">
+        <div class="preview-info">
+          <i class="fas fa-eye"></i> Live Preview
+        </div>
+
+        <div id="wifi-card">
+          <div class="card-header-bg" id="card-header"></div>
+          
+          <div class="card-content">
+            <div class="network-icon-display">
+              <i class="fas fa-wifi" id="card-icon"></i>
+            </div>
+            
+            <div class="ssid-display" id="card-ssid">Your Network</div>
+            <div class="pass-display" id="card-pass">••••••••</div>
+
+            <div class="qr-frame">
+              <canvas id="qrcode"></canvas>
+            </div>
+            
+            <div class="scan-me-text">Scan to Connect</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div id="favorites" class="tab-content">
+    <div class="tabs-container" style="padding-top: 2rem;">
+      <div class="controls-panel" style="max-width: 600px; margin: 0 auto;">
+        <h2><i class="fas fa-heart"></i> Saved Favorites</h2>
+        <div id="favorites-list" style="min-height: 200px; display: flex; align-items: center; justify-content: center; color: var(--text-muted);">
+          <div style="text-align: center;">
+            <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 1rem; display: block; opacity: 0.5;"></i>
+            No saved favorites yet. Save your WiFi networks to access them quickly!
+          </div>
+        </div>
       </div>
     </div>
+  </div>
 
+  <div id="settings" class="tab-content">
+    <div class="settings-panel">
+      <div class="settings-grid">
+        <div class="setting-item">
+          <h3><i class="fas fa-palette"></i> Appearance</h3>
+          <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem;">Customize visual preferences</p>
+          <button class="btn btn-outline btn-small" onclick="toggleTheme()">
+            <i class="fas fa-adjust"></i> <span id="theme-btn-text">Light Mode</span>
+          </button>
+        </div>
+
+        <div class="setting-item">
+          <h3><i class="fas fa-database"></i> Storage</h3>
+          <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem;" id="storage-info">Local storage enabled.</p>
+          <button class="btn btn-outline btn-small" onclick="clearAllData()">
+            <i class="fas fa-trash"></i> Clear Data
+          </button>
+        </div>
+      </div>
+
+      <div class="controls-panel" style="max-width: 600px; margin: 0 auto;">
+        <h2><i class="fas fa-info-circle"></i> Keyboard Shortcuts</h2>
+        <div style="display: grid; gap: 1rem;">
+          <div style="display: flex; justify-content: space-between; padding: 0.75rem; background: rgba(0,0,0,0.2); border-radius: 8px;">
+            <span>Generate QR Code</span>
+            <span class="kbd">Enter</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; padding: 0.75rem; background: rgba(0,0,0,0.2); border-radius: 8px;">
+            <span>Download Card</span>
+            <span class="kbd">Ctrl+D</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; padding: 0.75rem; background: rgba(0,0,0,0.2); border-radius: 8px;">
+            <span>Share Card</span>
+            <span class="kbd">Ctrl+S</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; padding: 0.75rem; background: rgba(0,0,0,0.2); border-radius: 8px;">
+            <span>Toggle Dark Mode</span>
+            <span class="kbd">Ctrl+L</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="about" class="tab-content">
+    <div class="about-section">
+      <h3><i class="fas fa-info-circle"></i> About Connect</h3>
+      <p>Connect is a modern, privacy-first WiFi QR code generator that helps you share network credentials instantly and securely.</p>
+      
+      <p style="margin-top: 1.5rem;"><strong>Why Connect?</strong></p>
+      <ul>
+        <li>✅ <strong>100% Private</strong> - Your data never leaves your device</li>
+        <li>✅ <strong>Instant QR Codes</strong> - Generate beautiful, scannable codes in seconds</li>
+        <li>✅ <strong>Customizable</strong> - Personalize colors and icons</li>
+        <li>✅ <strong>Easy Sharing</strong> - Download or share directly</li>
+        <li>✅ <strong>No Account Required</strong> - No login, no tracking, no ads</li>
+      </ul>
+
+      <h3 style="margin-top: 2rem;">✨ Features</h3>
+      <div class="feature-grid">
+        <div class="feature-card">
+          <i class="fas fa-qrcode"></i>
+          <h4>QR Code Generation</h4>
+          <p>Create scannable codes from WiFi details instantly</p>
+        </div>
+
+        <div class="feature-card">
+          <i class="fas fa-image"></i>
+          <h4>Download & Share</h4>
+          <p>Save as image or share directly to apps</p>
+        </div>
+
+        <div class="feature-card">
+          <i class="fas fa-shield-alt"></i>
+          <h4>Privacy Focused</h4>
+          <p>All processing happens locally on your device</p>
+        </div>
+
+        <div class="feature-card">
+          <i class="fas fa-paint-brush"></i>
+          <h4>Customizable</h4>
+          <p>Custom colors, icons, and card designs</p>
+        </div>
+
+        <div class="feature-card">
+          <i class="fas fa-mobile-alt"></i>
+          <h4>Fully Responsive</h4>
+          <p>Works perfectly on desktop, tablet, and mobile</p>
+        </div>
+
+        <div class="feature-card">
+          <i class="fas fa-bolt"></i>
+          <h4>Lightning Fast</h4>
+          <p>Optimized performance with instant updates</p>
+        </div>
+      </div>
+
+      <p style="margin-top: 2rem; border-top: 1px solid var(--glass-border); padding-top: 2rem;">
+        <strong>Version:</strong> 2.0 | <strong>Made with ❤️ for privacy lovers</strong>
+      </p>
+    </div>
   </div>
 
   <div class="toast" id="toast">
@@ -515,33 +1437,116 @@
   </div>
 
   <script>
-    /* --- State Management --- */
     const els = {
       ssid: document.getElementById('ssid'),
       password: document.getElementById('password'),
       encryption: document.getElementById('encryption'),
       icon: document.getElementById('icon-select'),
       hidePass: document.getElementById('hide-pass-toggle'),
+      showPass: document.getElementById('show-pass-toggle'),
       cardSSID: document.getElementById('card-ssid'),
       cardPass: document.getElementById('card-pass'),
       cardIcon: document.getElementById('card-icon'),
       cardHeader: document.getElementById('card-header'),
       qrCanvas: document.getElementById('qrcode'),
       toast: document.getElementById('toast'),
-      strengthFill: document.getElementById('strength-fill')
+      strengthFill: document.getElementById('strength-fill'),
+      strengthText: document.getElementById('strength-text'),
+      colorPicker: document.getElementById('color-picker'),
+      themeToggle: document.getElementById('theme-toggle')
     };
 
-    /* --- Initialization --- */
     window.onload = () => {
-      generateQR(true); 
+      loadSavedData();
+      generateQR(true);
+      loadFavorites();
+      updateThemeButton();
+      updateFavoriteButton();
     };
 
-    /* --- Live Preview Logic --- */
-    function updateLivePreview() {
-      // SSID
-      els.cardSSID.textContent = els.ssid.value.trim() || "Your Network";
+    document.addEventListener('keydown', (e) => {
+      if (e.ctrlKey || e.metaKey) {
+        if (e.key === 'd') { e.preventDefault(); downloadCard(); }
+        if (e.key === 's') { e.preventDefault(); shareCard(); }
+        if (e.key === 'l') { e.preventDefault(); toggleTheme(); }
+      }
+      if (e.key === 'Enter') {
+        if (document.activeElement !== els.password) {
+          e.preventDefault();
+          generateQR();
+        }
+      }
+    });
+
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+      document.getElementById(tabName).classList.add('active');
+      document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+      localStorage.setItem('activeTab', tabName);
+      closeMobileMenu();
+    }
+
+    function toggleHamburgerMenu() {
+      const hamburger = document.getElementById('navbar-hamburger');
+      const mobileMenu = document.getElementById('mobile-nav-menu');
+      hamburger.classList.toggle('active');
+      mobileMenu.classList.toggle('active');
       
-      // Password logic
+      // Prevent body scroll when menu is open
+      if (mobileMenu.classList.contains('active')) {
+        document.body.style.overflow = 'hidden';
+      } else {
+        document.body.style.overflow = '';
+      }
+    }
+
+    function closeMobileMenu() {
+      const hamburger = document.getElementById('navbar-hamburger');
+      const mobileMenu = document.getElementById('mobile-nav-menu');
+      hamburger.classList.remove('active');
+      mobileMenu.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+
+    // Close mobile menu when clicking outside
+    document.addEventListener('click', (e) => {
+      const hamburger = document.getElementById('navbar-hamburger');
+      const mobileMenu = document.getElementById('mobile-nav-menu');
+      const navbar = document.querySelector('.navbar');
+      
+      if (!navbar.contains(e.target) && !mobileMenu.contains(e.target)) {
+        closeMobileMenu();
+      }
+    });
+
+    const activeTab = localStorage.getItem('activeTab') || 'generator';
+    if (activeTab !== 'generator') {
+      switchTab(activeTab);
+    }
+
+    function toggleTheme() {
+      const html = document.documentElement;
+      html.classList.toggle('light-mode');
+      const isDark = !html.classList.contains('light-mode');
+      localStorage.setItem('darkMode', isDark);
+      updateThemeButton();
+    }
+
+    function updateThemeButton() {
+      const isDark = !document.documentElement.classList.contains('light-mode');
+      const btn = document.getElementById('theme-btn-text');
+      if (btn) btn.textContent = isDark ? 'Light Mode' : 'Dark Mode';
+      const icon = els.themeToggle.querySelector('i');
+      icon.className = isDark ? 'fas fa-moon' : 'fas fa-sun';
+    }
+
+    if (localStorage.getItem('darkMode') === 'false') {
+      document.documentElement.classList.add('light-mode');
+    }
+
+    function updateLivePreview() {
+      els.cardSSID.textContent = els.ssid.value.trim() || "Your Network";
       const pass = els.password.value;
       
       if (els.hidePass.checked && pass.length > 0) {
@@ -550,19 +1555,46 @@
         els.cardPass.textContent = pass ? pass : "No Password";
       }
       
-      // Icon
       els.cardIcon.className = els.icon.value;
+      saveLiveData();
+      updateFavoriteButton();
+    }
+
+    function updateFavoriteButton() {
+      const ssid = els.ssid.value.trim();
+      const btn = document.getElementById('save-favorite-btn');
+      if (!btn) return;
+      
+      const favorites = JSON.parse(localStorage.getItem('wifiFavorites') || '[]');
+      const isSaved = favorites.some(fav => fav.ssid === ssid);
+      
+      const icon = btn.querySelector('i');
+      if (isSaved) {
+        icon.className = 'fas fa-star';
+        btn.style.color = '#fbbf24';
+        btn.style.borderColor = '#fbbf24';
+        btn.title = 'Already saved! Click to update';
+      } else {
+        icon.className = 'fas fa-star';
+        btn.style.color = '';
+        btn.style.borderColor = '';
+        btn.title = 'Save to favorites';
+      }
+    }
+
+    function togglePasswordVisibility() {
+      els.password.type = els.showPass.checked ? 'text' : 'password';
     }
 
     function updateTheme(color) {
       document.documentElement.style.setProperty('--primary', color);
       document.documentElement.style.setProperty('--primary-hover', adjustColor(color, -20));
       els.cardHeader.style.background = `linear-gradient(135deg, ${color}, ${adjustColor(color, 40)})`;
-      document.querySelector('.brand').style.background = `linear-gradient(135deg, ${color}, ${adjustColor(color, 40)})`;
-      document.querySelector('.brand').style.webkitBackgroundClip = 'text';
+      document.querySelector('.navbar-brand').style.background = `linear-gradient(135deg, ${color}, ${adjustColor(color, 40)})`;
+      document.querySelector('.navbar-brand').style.webkitBackgroundClip = 'text';
+      localStorage.setItem('themeColor', color);
     }
 
-    /* --- QR Generation --- */
     function generateQR(isInit = false) {
       const ssid = els.ssid.value.trim();
       const password = els.password.value;
@@ -574,12 +1606,11 @@
         return;
       }
 
-      if(!isInit) {
+      if (!isInit) {
         document.getElementById('gen-text').style.display = 'none';
         document.getElementById('gen-loader').style.display = 'block';
       }
 
-      // Always use real password for QR data
       const qrText = `WIFI:T:${encryption};S:${ssid || "EXAMPLE"};P:${password};;`;
       
       setTimeout(() => {
@@ -588,20 +1619,21 @@
           margin: 1,
           color: { dark: "#1e293b", light: "#ffffff" }
         }, (error) => {
-          if(!isInit) {
+          if (!isInit) {
             document.getElementById('gen-text').style.display = 'inline';
             document.getElementById('gen-loader').style.display = 'none';
           }
           if (error) console.error(error);
-          else if (!isInit) showToast("QR Code Updated");
+          else if (!isInit) showToast("✨ QR Code Updated");
         });
       }, isInit ? 0 : 300);
     }
 
-    /* --- Password Strength --- */
     function checkStrength() {
       const pass = els.password.value;
       let strength = 0;
+      let text = '';
+      
       if (pass.length > 5) strength += 20;
       if (pass.length > 8) strength += 20;
       if (/[A-Z]/.test(pass)) strength += 20;
@@ -609,15 +1641,23 @@
       if (/[^A-Za-z0-9]/.test(pass)) strength += 20;
 
       els.strengthFill.style.width = strength + "%";
-      if(strength < 40) els.strengthFill.style.backgroundColor = "var(--danger)";
-      else if(strength < 80) els.strengthFill.style.backgroundColor = "#fbbf24";
-      else els.strengthFill.style.backgroundColor = "var(--success)";
+      
+      if (strength < 40) {
+        els.strengthFill.style.backgroundColor = "var(--danger)";
+        text = "Weak";
+      } else if (strength < 80) {
+        els.strengthFill.style.backgroundColor = "#fbbf24";
+        text = "Good";
+      } else {
+        els.strengthFill.style.backgroundColor = "var(--success)";
+        text = "Strong";
+      }
+      
+      els.strengthText.textContent = text ? `Strength: ${text}` : '';
     }
 
-    /* --- Image Capture --- */
     async function captureCard() {
       const card = document.getElementById('wifi-card');
-      
       return await html2canvas(card, {
         scale: 3, 
         backgroundColor: null,
@@ -628,64 +1668,200 @@
           const clonedCard = clonedDoc.getElementById('wifi-card');
           clonedCard.style.transform = 'none';
           clonedCard.style.boxShadow = 'none';
-          // Ensure correct sizing during capture
           clonedCard.style.maxWidth = '400px'; 
         }
       });
     }
 
-    /* --- Download --- */
     async function downloadCard() {
       const ssid = els.ssid.value.trim() || "WiFi";
-      showToast("Generating image...", false);
+      showToast("⏳ Generating image...", false);
 
       try {
         const canvas = await captureCard();
         const link = document.createElement('a');
-        link.download = `${ssid}_Connect.png`;
+        link.download = `${ssid}_WiFi.png`;
         link.href = canvas.toDataURL('image/png');
         link.click();
-        showToast("Download started!");
+        showToast("✅ Download started!");
       } catch (err) {
         console.error(err);
-        showToast("Error generating image", true);
+        showToast("❌ Error generating image", true);
       }
     }
 
-    /* --- Share --- */
     async function shareCard() {
-      showToast("Preparing to share...", false);
+      showToast("⏳ Preparing to share...", false);
       try {
         const canvas = await captureCard();
-        
         canvas.toBlob(async (blob) => {
           if (navigator.share && navigator.canShare) {
             const file = new File([blob], "wifi-card.png", { type: "image/png" });
             const shareData = {
               files: [file],
-              title: 'Connect to WiFi',
+              title: 'Connect WiFi',
               text: `Connect to ${els.ssid.value || 'WiFi'} using this QR code.`
             };
 
             if (navigator.canShare(shareData)) {
               await navigator.share(shareData);
-              showToast("Shared successfully!");
+              showToast("✅ Shared successfully!");
             } else {
               throw new Error("Sharing not supported");
             }
           } else {
             const item = new ClipboardItem({ "image/png": blob });
             await navigator.clipboard.write([item]);
-            showToast("Image copied to clipboard!");
+            showToast("📋 Image copied to clipboard!");
           }
         });
       } catch (err) {
         console.error(err);
-        showToast("Sharing failed / Copied instead", true);
+        showToast("⚠️ Sharing failed / Copied instead", true);
       }
     }
 
-    /* --- Helpers --- */
+    function copyWiFiString() {
+      const ssid = els.ssid.value.trim();
+      const password = els.password.value;
+      const encryption = els.encryption.value;
+      
+      if (!ssid) {
+        showToast("❌ Please enter a Network Name", true);
+        return;
+      }
+
+      const wifiString = `WIFI:T:${encryption};S:${ssid};P:${password};;`;
+      navigator.clipboard.writeText(wifiString).then(() => {
+        showToast("✅ WiFi string copied!");
+      }).catch(() => {
+        showToast("❌ Failed to copy", true);
+      });
+    }
+
+    function saveFavorite() {
+      const ssid = els.ssid.value.trim();
+      const password = els.password.value;
+      const encryption = els.encryption.value;
+      const icon = els.icon.value;
+      const color = els.colorPicker.value;
+
+      if (!ssid) {
+        showToast("❌ Please enter a Network Name", true);
+        return;
+      }
+
+      const favorites = JSON.parse(localStorage.getItem('wifiFavorites') || '[]');
+      const existing = favorites.findIndex(fav => fav.ssid === ssid);
+
+      if (existing !== -1) {
+        favorites[existing] = { ssid, password, encryption, icon, color, name: ssid };
+        showToast("✅ Favorite updated!");
+      } else {
+        favorites.push({ ssid, password, encryption, icon, color, name: ssid });
+        showToast("❤️ Added to favorites!");
+      }
+
+      localStorage.setItem('wifiFavorites', JSON.stringify(favorites));
+      loadFavorites();
+      updateFavoriteButton();
+    }
+
+    function loadFavorites() {
+      const favorites = JSON.parse(localStorage.getItem('wifiFavorites') || '[]');
+      const list = document.getElementById('favorites-list');
+
+      if (favorites.length === 0) {
+        list.innerHTML = '<div style="text-align: center; color: var(--text-muted);"><i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 1rem; display: block; opacity: 0.5;"></i>No saved favorites yet. Save your WiFi networks!</div>';
+        return;
+      }
+
+      list.innerHTML = favorites.map(fav => `
+        <div class="favorite-item">
+          <div class="favorite-info" onclick="loadFavorite('${fav.ssid.replace(/'/g, "\\'")}')">
+            <div class="favorite-name"><i class="fas ${fav.icon}"></i> ${fav.name}</div>
+            <div class="favorite-ssid">${fav.ssid}</div>
+          </div>
+          <div class="favorite-actions">
+            <button onclick="loadFavorite('${fav.ssid.replace(/'/g, "\\'")}')" title="Load">
+              <i class="fas fa-upload"></i>
+            </button>
+            <button onclick="deleteFavorite('${fav.ssid.replace(/'/g, "\\'")}')" title="Delete">
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function loadFavorite(ssid) {
+      const favorites = JSON.parse(localStorage.getItem('wifiFavorites') || '[]');
+      const fav = favorites.find(f => f.ssid === ssid);
+
+      if (fav) {
+        els.ssid.value = fav.ssid;
+        els.password.value = fav.password;
+        els.encryption.value = fav.encryption;
+        els.icon.value = fav.icon;
+        els.colorPicker.value = fav.color;
+        updateTheme(fav.color);
+        updateLivePreview();
+        generateQR();
+        switchTab('generator');
+        showToast("✅ Favorite loaded!");
+      }
+    }
+
+    function deleteFavorite(ssid) {
+      if (confirm(`Delete favorite "${ssid}"?`)) {
+        let favorites = JSON.parse(localStorage.getItem('wifiFavorites') || '[]');
+        favorites = favorites.filter(f => f.ssid !== ssid);
+        localStorage.setItem('wifiFavorites', JSON.stringify(favorites));
+        loadFavorites();
+        showToast("🗑️ Favorite deleted!");
+      }
+    }
+
+    function saveLiveData() {
+      const data = {
+        ssid: els.ssid.value,
+        password: els.password.value,
+        encryption: els.encryption.value,
+        icon: els.icon.value,
+        color: els.colorPicker.value,
+        hidePass: els.hidePass.checked
+      };
+      localStorage.setItem('wifiLiveData', JSON.stringify(data));
+    }
+
+    function loadSavedData() {
+      const data = JSON.parse(localStorage.getItem('wifiLiveData') || '{}');
+      if (data.ssid) els.ssid.value = data.ssid;
+      if (data.password) els.password.value = data.password;
+      if (data.encryption) els.encryption.value = data.encryption;
+      if (data.icon) els.icon.value = data.icon;
+      if (data.color) els.colorPicker.value = data.color;
+      if (data.hidePass) els.hidePass.checked = data.hidePass;
+      
+      const savedColor = localStorage.getItem('themeColor');
+      if (savedColor) updateTheme(savedColor);
+      
+      updateLivePreview();
+    }
+
+    function clearAllData() {
+      if (confirm('Clear all saved data? This cannot be undone.')) {
+        localStorage.removeItem('wifiLiveData');
+        localStorage.removeItem('wifiFavorites');
+        els.ssid.value = '';
+        els.password.value = '';
+        updateLivePreview();
+        generateQR(true);
+        loadFavorites();
+        showToast("🗑️ All data cleared!");
+      }
+    }
+
     function showToast(msg, isError = false) {
       const toast = els.toast;
       const icon = toast.querySelector('i');
@@ -697,7 +1873,7 @@
     }
 
     function adjustColor(color, amount) {
-        return '#' + color.replace(/^#/, '').replace(/../g, color => ('0'+Math.min(255, Math.max(0, parseInt(color, 16) + amount)).toString(16)).substr(-2));
+      return '#' + color.replace(/^#/, '').replace(/../g, color => ('0' + Math.min(255, Math.max(0, parseInt(color, 16) + amount)).toString(16)).substr(-2));
     }
   </script>
 </body>
